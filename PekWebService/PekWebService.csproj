@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+	  <TargetFramework>net9.0</TargetFramework>
+	  <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <UserSecretsId>d45cd4e4-9724-41cd-9dc1-995e3bb843cb</UserSecretsId>
+	  <EnableCompressionInPublish>false</EnableCompressionInPublish>
+  </PropertyGroup>
+
+
+	<ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.3" />
+    <PackageReference Include="System.Private.ServiceModel" Version="4.10.3" />
+    <PackageReference Include="System.ServiceModel.Duplex" Version="6.0.0" />
+    <PackageReference Include="System.ServiceModel.Security" Version="6.0.0" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <ProjectReference Include="..\AcraUtils\AcraUtils.csproj" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services" />
+  </ItemGroup>
+
+</Project>

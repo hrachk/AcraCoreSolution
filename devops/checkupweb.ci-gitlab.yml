@@ -1,0 +1,144 @@
+stages:
+- build
+- deploy
+
+variables: 
+# Nexus repo
+  NEXUS_HOST: nexus:8123
+# Development
+  DEV_NETWORK: acra_dev_docker_net
+  DEV_CHECKUPWEB: dev-acra-checkupweb/checkupweb
+  DEV_IMAGE_CHECKUPWEB: checkupweb-dev
+  DEV_PORT_2: 9051
+# Production
+  PROD_NETWORK: prod_docker_net
+  PROD_CHECKUPWEB: prod-acra-checkupweb/checkupweb
+  PROD_IMAGE_CHECKUPWEB: checkupweb-prod
+  PROD_PORT_2: 9051
+
+########### CheckupWeb ###########
+
+########### Development ###########
+#--------------  BUILD  -------------#
+
+checkupweb_dev:
+  stage: build
+  only:
+    - "develop"
+  tags:
+   - "multirunner-1"
+   - docker
+  script:
+    - sleep 5
+    - docker login $NEXUS_HOST -u "$NEXUS_USER" -p "$NEXUS_PASSWORD"
+    - docker build -f devops/Dockerfile-CheckUpWeb . -t $NEXUS_HOST/$DEV_CHECKUPWEB:$CI_PIPELINE_ID
+    - docker push $NEXUS_HOST/$DEV_CHECKUPWEB:$CI_PIPELINE_ID
+
+#----------  DEPLOY  ----------#
+
+
+deploy_checkupweb_dev:
+  stage: deploy
+  only:
+    - "develop"
+  tags:
+   - "multirunner-1"
+   - docker
+  needs:
+    - checkupweb_dev
+  script:
+    - |
+      sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no devops@$devrunner <<EOF
+      docker login $NEXUS_HOST -u "$NEXUS_USER" -p "$NEXUS_PASSWORD"
+      docker pull $NEXUS_HOST/$DEV_CHECKUPWEB:$CI_PIPELINE_ID
+      docker stop $DEV_IMAGE_CHECKUPWEB || true
+      docker rm $DEV_IMAGE_CHECKUPWEB || true
+      docker run -d \
+        --name $DEV_IMAGE_CHECKUPWEB \
+        --network $DEV_NETWORK \
+        --restart always \
+        -p $DEV_PORT_2:$DEV_PORT_2 \
+        -v /etc/localtime:/etc/localtime:ro \
+        -v /etc/timezone:/etc/timezone:ro \
+        -v /opt/acra/settings/checkupweb-dev/appsettings.json:/app/appsettings.json:ro \
+        -v /opt/acra/storage/checkupweb/converter/files/:/app/converter/files/:rw \
+        -v /opt/acra/storage/checkupweb/converter/archivefiles/:/app/converter/archivefiles/:rw \
+        $NEXUS_HOST/$DEV_CHECKUPWEB:$CI_PIPELINE_ID
+      
+      echo "Waiting for container to initialize..."
+      sleep 10
+      if docker ps --format "table {{.Names}}\t{{.Status}}" | grep -q "$DEV_IMAGE_CHECKUPWEB.*Up"; then
+        echo "Container $DEV_IMAGE_CHECKUPWEB is running"
+        echo "Recent logs:"
+        docker logs --tail 20 $DEV_IMAGE_CHECKUPWEB
+      else
+        echo "Container $DEV_IMAGE_CHECKUPWEB failed to start"
+        echo "Container status:"
+        docker ps -a --filter name=$DEV_IMAGE_CHECKUPWEB
+        echo "Container logs:"
+        docker logs $DEV_IMAGE_CHECKUPWEB
+        exit 1
+      fi
+      EOF
+
+########### Production ###########
+#--------------  BUILD  -------------#
+
+checkupweb_prod:
+  stage: build
+  only:
+    - "master"
+  tags:
+   - "multirunner-1"
+   - docker
+  script:
+    - sleep 5
+    - docker login $NEXUS_HOST -u "$NEXUS_USER" -p "$NEXUS_PASSWORD"
+    - docker build -f devops/Dockerfile-CheckUpWeb . -t $NEXUS_HOST/$PROD_CHECKUPWEB:$CI_PIPELINE_ID
+    - docker push $NEXUS_HOST/$PROD_CHECKUPWEB:$CI_PIPELINE_ID
+
+#----------  DEPLOY  ----------#
+
+deploy_checkupweb_prod:
+  stage: deploy
+  only:
+    - "master"
+  tags:
+   - "multirunner-1"
+   - docker
+  needs:
+    - checkupweb_prod
+  script:
+    - |
+      sshpass -p "$PROD_SSH_PASSWORD" ssh -o StrictHostKeyChecking=no devops@$dockrunner <<EOF
+      docker login $NEXUS_HOST -u "$NEXUS_USER" -p "$NEXUS_PASSWORD"
+      docker pull $NEXUS_HOST/$PROD_CHECKUPWEB:$CI_PIPELINE_ID
+      docker stop $PROD_IMAGE_CHECKUPWEB || true
+      docker rm $PROD_IMAGE_CHECKUPWEB || true
+      docker run -d \
+        --name $PROD_IMAGE_CHECKUPWEB \
+        --network $PROD_NETWORK \
+        --restart always \
+        -p $PROD_PORT_2:$PROD_PORT_2 \
+        -v /etc/localtime:/etc/localtime:ro \
+        -v /etc/timezone:/etc/timezone:ro \
+        -v /opt/acra/settings/checkupweb-prod/appsettings.json:/app/appsettings.json:ro \
+        -v /opt/acra/storage/checkupweb/converter/files/:/app/converter/files/:rw \
+        -v /opt/acra/storage/checkupweb/converter/archivefiles/:/app/converter/archivefiles/:rw \
+        $NEXUS_HOST/$PROD_CHECKUPWEB:$CI_PIPELINE_ID
+      
+      echo "Waiting for container to initialize..."
+      sleep 10
+      if docker ps --format "table {{.Names}}\t{{.Status}}" | grep -q "$PROD_IMAGE_CHECKUPWEB.*Up"; then
+        echo "Container $PROD_IMAGE_CHECKUPWEB is running"
+        echo "Recent logs:"
+        docker logs --tail 20 $PROD_IMAGE_CHECKUPWEB
+      else
+        echo "Container $PROD_IMAGE_CHECKUPWEB failed to start"
+        echo "Container status:"
+        docker ps -a --filter name=$PROD_IMAGE_CHECKUPWEB
+        echo "Container logs:"
+        docker logs $PROD_IMAGE_CHECKUPWEB
+        exit 1
+      fi
+      EOF

@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "PekWebService": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:59300;http://localhost:59301"
+    }
+  }
+}

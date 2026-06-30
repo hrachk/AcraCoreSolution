@@ -1,0 +1,16 @@
+﻿{
+  "ExtendedData": {
+    "inputs": [
+      "http://192.168.103.112:8080/taxsystem-ws-acra/taxpayer/acraService?wsdl"
+    ],
+    "collectionTypes": [
+      "System.Array",
+      "System.Collections.Generic.Dictionary`2"
+    ],
+    "namespaceMappings": [
+      "*, PEK_ServiceReference"
+    ],
+    "targetFramework": "net10.0",
+    "typeReuseMode": "All"
+  }
+}

@@ -1,0 +1,22 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+<div class="row">
+    <div class="col-md-4">
+        <button type="button" onclick="location.href='@Url.Action("Start", "AcraId")'">
+            Start
+        </button>
+        <p></p>
+        <button type="button" onclick="location.href='@Url.Action("OneTimeStart", "AcraId")'">
+            One Time Start
+        </button>
+        <p></p>
+        <button type="button" onclick="location.href='@Url.Action("Status", "AcraId")'">
+            Check Status
+        </button>
+    </div>
+</div>
+

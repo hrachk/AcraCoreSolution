@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+	  <TargetFramework>net9.0</TargetFramework>
+    <Features>strict</Features>
+    <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+    <UserSecretsId>4bbb1621-b56f-47eb-90a2-c7ff53e2471b</UserSecretsId>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <Optimize>false</Optimize>
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="16.1.1" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <ProjectReference Include="..\AcraData\AcraData.csproj" />
+    <ProjectReference Include="..\AcraIDServices\AcraIDServices.csproj" />
+    <ProjectReference Include="..\AcraUtils\AcraUtils.csproj" />
+  </ItemGroup>
+
+</Project>

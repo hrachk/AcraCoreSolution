@@ -1,0 +1,139 @@
+stages:
+- build
+- deploy
+
+variables: 
+# Nexus Repo
+  NEXUS_HOST: nexus:8123
+# Development
+  DEV_NETWORK: acra_dev_docker_net
+  DEV_VALIDATOR: dev-acra-validator/acravalidator
+  DEV_IMAGE_VALID: acravalidator-dev
+  DEV_PORT_9: 9071
+# Production
+  PROD_NETWORK: prod_docker_net
+  PROD_VALIDATOR: prod-acra-validator/acravalidator
+  PROD_IMAGE_VALID: acravalidator-prod
+  PROD_PORT_9: 9071
+
+########### ACRA VALIDATOR ###########
+
+########### Development ###########
+#--------------  BUILD  -------------#
+
+validator_dev:
+  stage: build
+  only:
+   - "develop"
+  tags:
+   - "multirunner-1"
+   - docker
+  script:
+    - sleep 5
+    - docker login $NEXUS_HOST -u "$NEXUS_USER" -p "$NEXUS_PASSWORD"
+    - docker build -f devops/Dockerfile-acravalidator . -t $NEXUS_HOST/$DEV_VALIDATOR:$CI_PIPELINE_ID
+    - docker push $NEXUS_HOST/$DEV_VALIDATOR:$CI_PIPELINE_ID
+
+#----------  DEPLOY  ----------#
+
+deploy_validator_dev:
+  stage: deploy
+  only:
+   - "develop"
+  tags:
+   - "multirunner-1"
+   - docker
+  needs:
+    - validator_dev
+  script:
+    - |
+      sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no devops@$devrunner <<EOF
+      docker login $NEXUS_HOST -u "$NEXUS_USER" -p "$NEXUS_PASSWORD"
+      docker pull $NEXUS_HOST/$DEV_VALIDATOR:$CI_PIPELINE_ID
+      docker stop $DEV_IMAGE_VALID || true
+      docker rm $DEV_IMAGE_VALID || true
+      docker run -d \
+      --name $DEV_IMAGE_VALID \
+      --network $DEV_NETWORK \
+      --restart always \
+      -p $DEV_PORT_9:$DEV_PORT_9 \
+      -v /etc/localtime:/etc/localtime:ro \
+      -v /etc/timezone:/etc/timezone:ro \
+      -v /opt/acra/settings/acravalidator-dev/appsettings.json:/app/appsettings.json:ro \
+      $NEXUS_HOST/$DEV_VALIDATOR:$CI_PIPELINE_ID
+      
+      echo "Waiting for container to initialize..."
+      sleep 10
+      if docker ps --format "table {{.Names}}\t{{.Status}}" | grep -q "$DEV_IMAGE_VALID.*Up"; then
+        echo "Container $DEV_IMAGE_VALID is running"
+        echo "Recent logs:"
+        docker logs --tail 20 $DEV_IMAGE_VALID
+      else
+        echo "Container $DEV_IMAGE_VALID failed to start"
+        echo "Container status:"
+        docker ps -a --filter name=$DEV_IMAGE_VALID
+        echo "Container logs:"
+        docker logs $DEV_IMAGE_VALID
+        exit 1
+      fi
+      EOF
+
+########### Production ###########
+#--------------  BUILD  -------------#
+
+validator_prod:
+  stage: build
+  only:
+   - "master"
+  tags:
+   - "multirunner-1"
+   - docker
+  script:
+    - sleep 5
+    - docker login $NEXUS_HOST -u "$NEXUS_USER" -p "$NEXUS_PASSWORD"
+    - docker build -f devops/Dockerfile-acravalidator . -t $NEXUS_HOST/$PROD_VALIDATOR:$CI_PIPELINE_ID
+    - docker push $NEXUS_HOST/$PROD_VALIDATOR:$CI_PIPELINE_ID
+
+#----------  DEPLOY  ----------#
+
+deploy_validator_prod:
+  stage: deploy
+  only:
+   - "master"
+  tags:
+   - "multirunner-1"
+   - docker
+  needs:
+    - validator_prod
+  script:
+    - |
+      sshpass -p "$PROD_SSH_PASSWORD" ssh -o StrictHostKeyChecking=no devops@$dockrunner <<EOF
+      docker login $NEXUS_HOST -u "$NEXUS_USER" -p "$NEXUS_PASSWORD"
+      docker pull $NEXUS_HOST/$PROD_VALIDATOR:$CI_PIPELINE_ID
+      docker stop $PROD_IMAGE_VALID || true
+      docker rm $PROD_IMAGE_VALID || true
+      docker run -d \
+      --name $PROD_IMAGE_VALID \
+      --network $PROD_NETWORK \
+      --restart always \
+      -p $PROD_PORT_9:$PROD_PORT_9 \
+      -v /etc/localtime:/etc/localtime:ro \
+      -v /etc/timezone:/etc/timezone:ro \
+      -v /opt/acra/settings/acravalidator-prod/appsettings.json:/app/appsettings.json:ro \
+      $NEXUS_HOST/$PROD_VALIDATOR:$CI_PIPELINE_ID
+      
+      echo "Waiting for container to initialize..."
+      sleep 10
+      if docker ps --format "table {{.Names}}\t{{.Status}}" | grep -q "$PROD_IMAGE_VALID.*Up"; then
+        echo "Container $PROD_IMAGE_VALID is running"
+        echo "Recent logs:"
+        docker logs --tail 20 $PROD_IMAGE_VALID
+      else
+        echo "Container $PROD_IMAGE_VALID failed to start"
+        echo "Container status:"
+        docker ps -a --filter name=$PROD_IMAGE_VALID
+        echo "Container logs:"
+        docker logs $PROD_IMAGE_VALID
+        exit 1
+      fi
+      EOF

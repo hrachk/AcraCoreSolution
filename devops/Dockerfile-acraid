@@ -1,0 +1,28 @@
+# Use the official .NET SDK image to build the app
+FROM nexus:8123/dotnet5/sdk:5.0 AS build
+WORKDIR /src
+
+# Copy solution and project files
+
+COPY . .
+
+# Restore dependencies
+RUN dotnet restore AcraCoreSolution.sln
+
+# Build the project
+RUN dotnet build AcraIDGenerator/AcraIDGenerator.csproj -c Release
+
+# Publish as framework-dependent (simpler and smaller)
+RUN dotnet publish AcraIDGenerator/AcraIDGenerator.csproj -c Release -o /app/publish --self-contained true -r linux-x64
+
+# Use aspnet runtime image
+FROM nexus:8123/dotnet5/aspnet:5.0 AS runtime
+
+WORKDIR /app
+
+#ENV ASPNETCORE_URLS=http://+:80
+
+COPY --from=build /app/publish ./
+
+# Use dotnet command for framework-dependent apps
+ENTRYPOINT ["dotnet", "AcraIDGenerator.dll"]

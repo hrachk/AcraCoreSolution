@@ -1,0 +1,1053 @@
+﻿using System;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
+using AcraData.Models.Acra3;
+using System.Linq;
+
+namespace AcraData.Data
+{
+    public partial class Acra3DbContext : DbContext
+    {
+        public virtual DbSet<IdCard> IdCards { get; set; }
+        public virtual DbSet<LoginLog> LoginLogs { get; set; }
+        public virtual DbSet<Passport> Passports { get; set; }
+        public virtual DbSet<Person> Persons { get; set; }
+        public virtual DbSet<SourceReference> SourceReferences { get; set; }
+        public virtual DbSet<UserActivityLog> UserActivityLogs { get; set; }
+        public virtual DbSet<UserActivityParam> UserActivityParams { get; set; }
+        public virtual DbSet<UserActivityReportID> UserActivityReportIDs { get; set; }
+        public virtual DbSet<UserInfo> UserInfos { get; set; }
+        public virtual DbSet<CleansingHistory> CleansingHistories { get; set; }     
+        public virtual DbSet<DicFirstName> DicFirstNames { get; set; }
+        public virtual DbSet<DicLastName> DicLastNames { get; set; }
+        public virtual DbSet<Predicat> Predicats { get; set; }
+        public virtual DbSet<DicReportReason> DicReportReasons { get; set; }
+        public virtual DbSet<DicReport> DicReports { get; set; }
+        public virtual DbSet<DicReportSubReason> DicReportSubReasons { get; set; }        
+        public virtual DbSet<Source> Sources { get; set; }
+        public virtual DbSet<Credit> Credits { get; set; }
+        public virtual DbSet<CreditOwner> CreditOwners { get; set; }
+        public virtual DbSet<GuaranteeCancellation> GuaranteeCancellations { get; set; }
+        public virtual DbSet<Guarantor> Guarantors { get; set; }
+        public virtual DbSet<OrgOwner> OrgOwners { get; set; }
+        public virtual DbSet<DicCountries> DicCountries { get; set; }
+        public virtual DbSet<DicResident> DicResident { get; set; }
+        public virtual DbSet<DicSex> DicSex { get; set; }
+        public virtual DbSet<DicSynonym> DicSynonyms { get; set; }
+        public virtual DbSet<OrganizationNames> OrganizationNames { get; set; }
+        public virtual DbSet<Organization> Organizations { get; set; }
+        public virtual DbSet<LoanActivityTmp> LoanActivityTmps { get; set; }
+        public virtual DbSet<TriggerActivityTemp> TriggerActivityTmps { get; set; }
+        public virtual DbSet<MonitoringPlusActivityTemp> MonitoringPlusActivityTmps { get; set; }
+        public virtual DbSet<CreditStatusLog> CreditStatusLogs { get; set; }
+        public virtual DbSet<ReceivedPackage> ReceivedPackages { get; set; }
+        public virtual DbSet<PackageFile> PackageFiles { get; set; }
+        public virtual DbSet<ReceivedPacket> ReceivedPackets { get; set; }
+        public virtual DbSet<ScorePerson> ScorePersons { get; set; }
+        public virtual DbSet<AcraPersonsBySource> AcraPersonsBySources { get; set; }
+        public virtual DbSet<MonitoringPlusByAcraID> MonitoringPlusByAcraID { get; set; }
+        public virtual DbSet<BankIDs> BankIDs { get; set; }
+        public virtual DbSet<BankIDLegal> BankIDLegals { get; set; }
+        public virtual DbSet<MonitoringPlus_Source> MonitoringPlus_Sources { get; set; }
+        public virtual DbSet<UserInterfacePrivilege> UserInterfacePrivileges { get; set; }
+<<<<<<< HEAD
+        public virtual DbSet<Pek_Definition> Pek_Definitions { get; set; }
+        public virtual DbSet<Pek_ActivityLog> Pek_ActivityLogs { get; set; }
+        public virtual DbSet<Pek_Journal> Pek_Journal { get; set; }
+=======
+        public virtual DbSet<ACRAID_MAPPER> ACRAID_MAPPER { get; set; }
+>>>>>>> acraId
+        // public virtual DbSet<ACRAPersonMapper> ACRAPersonMappers { get; set; }
+        public virtual DbSet<AcraID_Errors> AcraID_Errors { get; set; }
+
+
+        public Acra3DbContext(DbContextOptions<Acra3DbContext> options) : base(options) { }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<CreditStatusLog>(entity =>
+            {
+                entity.Property(e => e.Id)
+                    .HasColumnName("ID")
+                    .HasColumnType("bigint(20)");
+
+                entity.Property(e => e.CreditId)
+                    .HasColumnName("CreditID")
+                     .HasColumnType("bigint(20)");
+
+                entity.Property(e => e.FirstState_InternalID).HasColumnType("int(11)");
+                entity.Property(e => e.OldValue).HasColumnType("int(11)");
+                entity.Property(e => e.NewValue).HasColumnType("int(11)");
+
+                entity.Property(e => e.StatusModifyDate).HasDefaultValueSql("'0000-00-00 00:00:00'");
+
+                entity.HasIndex(e => new { e.CreditId, e.StatusModifyDate})
+                    .HasName("IX_Credit");
+
+
+                entity.ToTable("CreditStatusLogs");
+            });
+
+
+            modelBuilder.Entity<TriggerActivityTemp>(entity =>
+            {
+                entity.Property(e => e.Id)
+                    .HasColumnName("ID")
+                    .HasColumnType("bigint(20)");
+
+                entity.Property(e => e.ActivityId)
+                    .HasColumnName("ActivityID")
+                     .HasColumnType("bigint(20)");
+
+                entity.Property(e => e.ActivityType).HasColumnType("int(11)");
+
+                entity.Property(e => e.Status)
+                    .HasColumnType("int(4)")
+                    .HasDefaultValueSql("'0'");
+
+                entity.ToTable("TriggerActivityTemp");
+            });
+
+            modelBuilder.Entity<MonitoringPlusActivityTemp>(entity =>
+            {
+                entity.Property(e => e.Id)
+                    .HasColumnName("ID")
+                    .HasColumnType("bigint(20)");
+
+                entity.Property(e => e.ActivityId)
+                    .HasColumnName("ActivityID")
+                     .HasColumnType("bigint(20)");
+
+                entity.Property(e => e.ActivityType).HasColumnType("int(11)");
+
+                entity.Property(e => e.Status)
+                    .HasColumnType("int(4)")
+                    .HasDefaultValueSql("'0'");
+
+                entity.ToTable("MonitoringPlusActivityTemp");
+            });
+
+
+            modelBuilder.Entity<IdCard>(entity =>
+            {
+                entity.HasIndex(e => e.IdCardNum)
+                    .HasName("IdCards_IdCardNum");
+
+                entity.HasIndex(e => e.PersonId)
+                    .HasName("IdCards_PersonID");
+
+                //entity.HasIndex(e => e.SourceId)
+                //    .HasName("idcards_ibfk_2");
+
+                entity.HasIndex(e => new { e.PersonId, e.IdCardNum })
+                    .HasName("PersonID_IdCardNum");
+
+                entity.Property(e => e.IncomingDate).HasDefaultValueSql("'0000-00-00 00:00:00'");
+
+                //entity.HasOne(e => e.Person)
+                //    .WithMany(p => p.IdCards)
+                //    .HasForeignKey(e => e.PersonId)
+                //    .HasConstraintName("idcards_ibfk_1");
+
+                entity.ToTable("IdCards");
+            });
+
+            modelBuilder.Entity<LoanActivityTmp>(entity =>
+            {
+                entity.Property(e => e.Id)
+                    .HasColumnName("ID")
+                    .HasColumnType("bigint(20)");
+
+                entity.Property(e => e.CreditID)
+                    .HasColumnName("CreditID")
+                    .HasColumnType("bigint(20)");
+
+                entity.Property(e => e.ActivityType).HasColumnType("int(11)");
+
+                entity.Property(e => e.Status)
+                    .HasColumnType("int(4)")
+                    .HasDefaultValueSql("'0'");
+
+                entity.ToTable("LoanActivityTmp");
+            });
+
+
+            modelBuilder.Entity<LoginLog>(entity =>
+            {
+                entity.HasIndex(e => e.Ipaddress)
+                    .HasName("IPAddress");
+
+                entity.HasIndex(e => e.UserId)
+                    .HasName("UserID_2");
+
+                entity.HasIndex(e => e.UserLogin)
+                    .HasName("UserLogin");
+
+                entity.ToTable("LoginLogs");
+            });
+
+            modelBuilder.Entity<Passport>(entity =>
+            {
+                entity.HasIndex(e => e.PassportNum)
+                    .HasName("Passports_PassportNum");
+
+                entity.HasIndex(e => e.PersonId)
+                    .HasName("Passports_PersonID");
+
+                entity.HasIndex(e => e.SourceId)
+                    .HasName("passports_ibfk_10");
+
+                entity.HasIndex(e => new { e.PersonId, e.PassportNum })
+                    .HasName("PersonID_PassportNum");
+
+                entity.Property(e => e.IncomingDate).HasDefaultValueSql("'0000-00-00 00:00:00'");
+
+                //entity.HasOne(d => d.Person)
+                //    .WithMany(p => p.Passports)
+                //    .HasForeignKey(d => d.PersonId)
+                //    .HasConstraintName("passports_ibfk_11");
+
+                entity.ToTable("Passports");
+            });
+
+            modelBuilder.Entity<Person>(entity =>
+            {
+                entity.HasIndex(e => e.FirstName)
+                    .HasName("FirstName");
+
+                entity.HasIndex(e => e.LastName)
+                    .HasName("LastName");
+                
+                entity.HasIndex(e => e.BirthDate)
+                    .HasName("BirthDate");
+
+                entity.HasIndex(e => new { e.FirstName, e.LastName, e.BirthDate, e.SocialCard })
+                    .HasName("PersonID");
+
+                entity.HasIndex(e => e.SocialCard)
+                    .HasName("SocialCard");
+
+                entity.HasIndex(e => e.SourceId)
+                    .HasName("SourceID");
+
+                 entity.Property(e => e.BlockStatus).HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.IncomingDate).HasDefaultValueSql("'0000-00-00 00:00:00'");
+
+                entity.ToTable("Persons");
+            });
+
+            modelBuilder.Entity<SourceReference>(entity =>
+            {
+                entity.HasKey(e => new { e.RecordId, e.ReferenceTable, e.SourceId });
+
+                entity.HasIndex(e => e.IncomingDate)
+                    .HasName("IncomingDate");
+
+                entity.HasIndex(e => e.ReceivedPackageId)
+                    .HasName("ReceivedPackageID");
+
+                entity.HasIndex(e => e.RecordId)
+                    .HasName("SourceReference_RecordID");
+
+                entity.HasIndex(e => e.ReferenceTable)
+                    .HasName("SourceReference_ReferenceTable");
+
+                entity.HasIndex(e => e.SourceId)
+                    .HasName("SourceReference_SourceID");
+
+                entity.HasIndex(e => e.Status)
+                    .HasName("SourceReference_Status");
+
+                entity.HasIndex(e => new { e.ReferenceTable, e.Status, e.SourceId })
+                    .HasName("source_ref_status");
+
+                entity.Property(e => e.RecordId).HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.ReferenceTable).HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.SourceId).HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Status).HasDefaultValueSql("'1'");
+
+                entity.ToTable("SourceReference");
+            });
+
+            modelBuilder.Entity<UserActivityLog>(entity =>
+            {
+                entity.HasIndex(e => e.ActivityTime)
+                    .HasName("ActivityTime");
+
+                entity.HasIndex(e => e.ActivityType)
+                    .HasName("ActivityType");
+
+                entity.HasIndex(e => e.UserId)
+                    .HasName("UserID");
+
+                entity.Property(e => e.ActivityTime).HasDefaultValueSql("'0000-00-00 00:00:00'");
+
+                entity.Property(e => e.ActivityType).HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.CleansingStatus).HasDefaultValueSql("'1'");
+
+                entity.Property(e => e.UserId).HasDefaultValueSql("'0'");
+
+                entity.ToTable("UserActivityLog");
+            });
+
+            modelBuilder.Entity<UserInfo>(entity =>
+            {
+                entity.HasIndex(e => e.ClientId)
+                    .HasName("UserInfo_ClientId");
+
+                entity.HasIndex(e => e.UserLogin)
+                    .HasName("UserInfo_UserLogin");
+
+                entity.HasIndex(e => e.UserPassword)
+                    .HasName("UserInfo_UserPassword");
+
+                entity.Property(e => e.Ipaddress).HasDefaultValueSql("''");
+
+                entity.ToTable("UserInfo");
+            });
+
+            modelBuilder.Entity<UserInterfacePrivilege>(entity =>
+              {
+                  entity.HasIndex(e => e.UserID).HasName("UserInterfeacePrivileges_UserID");
+                  entity.HasKey(e => new { e.UserID, e.InterfeaceID, e.Actions })
+                  .HasName("UserInterfacePrivilege_primary");
+                  entity.ToTable("UserInterfeacePrivileges");
+              }
+                );
+
+            modelBuilder.Entity<UserActivityParam>(entity =>
+            {
+                entity.HasIndex(e => e.UserActivityId)
+                    .HasName("UserActivityId");
+
+                entity.HasIndex(e => e.UserActivityParamId)
+                    .HasName("UserActivityParamID");
+
+                entity.HasIndex(e => e.UserActivityParamValue)
+                    .HasName("UserActivityParamValue");
+
+                entity.HasIndex(e => new { e.UserActivityId, e.UserActivityParamId })
+                    .HasName("UserActivityId_ParamID");
+
+                entity.HasIndex(e => new { e.UserActivityParamId, e.UserActivityParamValue })
+                    .HasName("UserActivityParamID_value");
+
+                entity.HasKey(e => new { e.UserActivityId,e.UserActivityParamId, e.UserActivityParamValue })
+                   .HasName("UserActivityParamID_primary");
+
+                entity.Property(e => e.Status)
+                              .HasColumnName("Status")
+                              .HasColumnType("tinyint(4) unsigned")
+                              .HasDefaultValueSql("1");
+               
+                entity.Property(e => e.UserActivityId).HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.UserActivityParamId).HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.UserActivityParamValue).HasDefaultValueSql("'0'");
+                
+
+                //entity.HasOne(e => e.UserActivityLog)
+                //    .WithMany(u => u.UserActivityParams)
+                //    .HasForeignKey(e => e.UserActivityId)
+                //    .OnDelete(DeleteBehavior.Restrict)
+                    //.HasConstraintName("FK_UserActivityParams");
+                //.HasConstraintName("useractivityparams_ibfk_1");
+
+                entity.ToTable("UserActivityParams");
+            });
+
+            modelBuilder.Entity<UserActivityReportID> (entity =>
+            {
+                entity.HasKey(e => e.UserActivityId);                   
+              
+                entity.ToTable("UserActivityReportID");
+            });
+
+            modelBuilder.Entity<CleansingHistory>(entity =>
+            {
+                entity.HasIndex(e => e.ClerckId)
+                    .HasName("ClerckID");
+
+                entity.HasIndex(e => e.NewId)
+                    .HasName("NewID");
+
+                entity.HasIndex(e => e.RemovedId)
+                    .HasName("RemovedID");
+
+                entity.HasIndex(e => e.SourceId)
+                    .HasName("SourceID");
+
+                entity.ToTable("CleansingHistory");
+            });          
+            
+            modelBuilder.Entity<DicFirstName>(entity =>
+            {
+                entity.HasKey(e => e.FirstNameId);
+
+                entity.HasIndex(e => e.FirstName)
+                    .HasName("FirstName");
+
+                entity.Property(e => e.FirstNameId)
+                    .HasColumnName("FirstNameID")
+                    .HasColumnType("int(11)");
+
+                entity.Property(e => e.FirstName)
+                    .IsRequired()
+                    .HasMaxLength(200)
+                    .HasDefaultValueSql("''");
+
+                entity.ToTable("DicFirstNames");
+            });
+
+            modelBuilder.Entity<DicLastName>(entity =>
+            {
+                entity.HasKey(e => e.LastNameId);
+
+                entity.HasIndex(e => e.LastName)
+                    .HasName("LastName");
+
+                entity.Property(e => e.LastNameId)
+                    .HasColumnName("LastNameID")
+                    .HasColumnType("int(11)");
+
+                entity.Property(e => e.LastName)
+                    .IsRequired()
+                    .HasMaxLength(200)
+                    .HasDefaultValueSql("''");
+
+                entity.ToTable("DicLastNames");
+            });          
+     
+            modelBuilder.Entity<Predicat>(entity =>
+            {
+                entity.HasKey(e => e.ID);              
+
+                entity.HasIndex(e => new { e.PersonId, e.PassportNum, e.IdCardNum, e.FirstNameID, e.LastNameID, e.SocialCard })
+                    .HasName("IX_Primary").IsUnique(true);
+
+                entity.HasIndex(e => new { e.PersonId, e.FirstNameID})
+                    .HasName("IX_FirstName");
+
+                entity.HasIndex(e => new { e.PersonId, e.LastNameID })
+                    .HasName("IX_LastName");
+
+                entity.HasIndex(e => new { e.PersonId, e.PassportNum })
+                    .HasName("IX_Passport");
+
+                entity.HasIndex(e => new { e.PersonId, e.IdCardNum })
+                    .HasName("IX_IDCard");
+
+                entity.HasIndex(e => new { e.PersonId, e.SocialCard })
+                    .HasName("IX_SocCard");
+
+                entity.HasIndex(e => e.Criteria1)
+                    .HasName("IX_Crit1");
+
+                entity.HasIndex(e => e.Criteria2)
+                    .HasName("IX_Crit2");
+
+                entity.HasIndex(e => e.Criteria3)
+                    .HasName("IX_Crit3");
+
+                entity.HasIndex(e => e.Criteria4)
+                    .HasName("IX_Crit4");
+
+                entity.HasIndex(e => e.Criteria5)
+                    .HasName("IX_Crit5");
+
+                entity.HasIndex(e => e.Criteria6)
+                    .HasName("IX_Crit6");
+
+                entity.HasIndex(e => e.Criteria7)
+                    .HasName("IX_Crit7");
+
+                entity.HasIndex(e => e.Criteria8)
+                    .HasName("IX_Crit8");
+
+                entity.HasIndex(e => e.PersonId)
+                    .HasName("IX_PersonID");
+
+                entity.Property(e => e.PersonId).HasColumnType("int(11)");
+
+                entity.Property(e => e.FirstNameID).HasColumnType("int(11)");
+
+                entity.Property(e => e.LastNameID).HasColumnType("int(11)");
+
+                entity.Property(e => e.PassportNum).HasMaxLength(30);
+
+                entity.Property(e => e.IdCardNum).HasMaxLength(30);
+
+                entity.Property(e => e.SocialCard).HasMaxLength(20);
+
+                entity.Property(e => e.Criteria1).HasColumnType("bigint(20)");
+
+                entity.Property(e => e.SC1).HasMaxLength(20);
+
+                entity.Property(e => e.Criteria2).HasColumnType("bigint(20)");
+
+                entity.Property(e => e.SC2).HasMaxLength(20);
+
+                entity.Property(e => e.Criteria3).HasColumnType("bigint(20)");
+
+                entity.Property(e => e.SC3).HasMaxLength(20);
+
+                entity.Property(e => e.Criteria4).HasColumnType("bigint(20)");
+
+                entity.Property(e => e.SC4).HasMaxLength(20);
+
+                entity.Property(e => e.Criteria5).HasColumnType("bigint(20)");
+
+                entity.Property(e => e.SC5).HasMaxLength(20);
+
+                entity.Property(e => e.Criteria6).HasColumnType("bigint(20)");
+
+                entity.Property(e => e.SC6).HasMaxLength(20);
+
+                entity.Property(e => e.Criteria7).HasColumnType("bigint(20)");
+
+                entity.Property(e => e.SC7).HasMaxLength(20);
+
+                entity.Property(e => e.Criteria8).HasColumnType("bigint(20)");
+
+                entity.Property(e => e.SC8).HasMaxLength(20);
+
+                entity.Property(e => e.AcraGroup).HasMaxLength(20);
+
+                entity.Property(e => e.IsDeleted)
+                  .HasColumnName("isDeleted")
+                  .HasColumnType("bit(1)")
+                  .HasDefaultValueSql("'b\\'0\\''");
+
+                entity.ToTable("Predicats");
+
+            });
+
+            modelBuilder.Entity<DicReportReason>(entity =>
+            {
+                entity.HasKey(e => e.ReportReasonId);
+
+                entity.Property(e => e.ReportReasonId)
+                    .HasColumnName("ReportReasonID")
+                    .HasColumnType("int(11)");
+
+                entity.Property(e => e.ReportReason)
+                    .IsRequired()
+                    .HasMaxLength(200)
+                    .HasDefaultValueSql("''");
+
+                entity.ToTable("DicReportReasons");
+            });
+
+            modelBuilder.Entity<DicReport>(entity =>
+            {
+                entity.HasKey(e => e.ReportId);
+
+                entity.Property(e => e.ReportId)
+                    .HasColumnName("ReportID")
+                    .HasColumnType("int(11)");
+
+                entity.Property(e => e.Report).HasMaxLength(200);
+
+                entity.Property(e => e.ReportPrice).HasColumnType("int(11)");
+
+                entity.Property(e => e.ReportType)
+                    .HasColumnType("int(11)")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.ScoreReport)
+                    .HasColumnType("int(11)")
+                    .HasDefaultValueSql("'0'");
+
+                entity.ToTable("DicReports");
+            });
+
+            modelBuilder.Entity<DicReportSubReason>(entity =>
+            {
+                entity.HasKey(e => e.ReportSubReasonId);
+
+                entity.HasIndex(e => e.ReportReasonId)
+                    .HasName("ReportReasonID");
+
+                entity.Property(e => e.ReportSubReasonId)
+                    .HasColumnName("ReportSubReasonID")
+                    .HasColumnType("int(11)");
+
+                entity.Property(e => e.ReportReasonId)
+                    .HasColumnName("ReportReasonID")
+                    .HasColumnType("int(11)")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.ReportSubReason)
+                    .IsRequired()
+                    .HasMaxLength(200)
+                    .HasDefaultValueSql("''");
+
+                entity.ToTable("DicReportSubReasons");
+            });
+
+            modelBuilder.Entity<Source>(entity =>
+            {
+                entity.HasKey(e => e.SourceId);
+
+                entity.HasIndex(e => e.CreditorTypeId)
+                    .HasName("CreditorTypeID");
+
+                entity.Property(e => e.SourceId)
+                    .HasColumnName("SourceID")
+                    .HasColumnType("int(11)");
+
+                entity.Property(e => e.AccountNumber).HasMaxLength(100);
+
+                entity.Property(e => e.Accountant).HasMaxLength(100);
+
+                entity.Property(e => e.Address).HasMaxLength(200);
+
+                entity.Property(e => e.Bank).HasMaxLength(100);
+
+                entity.Property(e => e.ContractDate).HasColumnType("date");
+
+                entity.Property(e => e.ContractId).HasMaxLength(100);
+
+                entity.Property(e => e.CreditorCode).HasMaxLength(50);
+
+                entity.Property(e => e.CreditorTypeId)
+                    .HasColumnName("CreditorTypeID")
+                    .HasColumnType("tinyint(4)")
+                    .HasDefaultValueSql("'1'");
+
+                entity.Property(e => e.EMail)
+                    .HasColumnName("eMail")
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.Fax).HasMaxLength(100);
+
+                entity.Property(e => e.HomePage).HasMaxLength(100);
+
+                entity.Property(e => e.Hvhh)
+                    .HasColumnName("HVHH")
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.Manager).HasMaxLength(100);
+
+                entity.Property(e => e.Phone).HasMaxLength(100);
+
+                entity.Property(e => e.ShortName).HasMaxLength(6);
+
+                entity.Property(e => e.ShowInReport).HasColumnType("tinyint(1)");
+
+                entity.Property(e => e.SourceName).HasMaxLength(200);
+
+                entity.Property(e => e.SourceType).HasColumnType("int(11)");
+
+                entity.Property(e => e.SpecialDiscount)
+                    .HasColumnType("int(11)")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Xmlname)
+                    .HasColumnName("XMLName")
+                    .HasMaxLength(100);
+
+                entity.ToTable("Sources");
+            });
+
+            modelBuilder.Entity<Credit>(entity =>
+            {
+                entity.Property(c => c.CreditStart).HasColumnType("date");
+                entity.Property(c => c.ActualCreditStart).HasColumnType("date");
+                entity.Property(c => c.FirstInstallment).HasColumnType("date");
+                entity.Property(c => c.LastInstallment).HasColumnType("date");
+                entity.Property(c => c.LastPaymentDate).HasColumnType("date");
+                entity.Property(c => c.OutstandingDate).HasColumnType("date");
+                entity.Property(c => c.ClassificationLastDate).HasColumnType("date");
+                entity.Property(e => e.IncomingDate)
+                  .HasColumnType("datetime")
+                  .HasDefaultValueSql("'0000-00-00 00:00:00'");
+
+                // entity.HasIndex(e => e.InternalID).HasName("PRIMARY").IsUnique(true);
+                entity.HasIndex(e => e.ExternalID).HasName("ExternalID");
+                entity.HasIndex(e => e.CreditID).HasName("CreditID");
+                entity.HasIndex(e => e.SourceID).HasName("SourceID");
+                entity.HasIndex(e => new { e.ExternalID, e.SourceID }).HasName("ExternalID_SourceID");
+                entity.HasIndex(e => e.ReceivedPackageID).HasName("ReceivedPackageID");
+                entity.HasIndex(e => e.IncomingDate).HasName("IncomingDate");
+                entity.HasIndex(e => e.CreditScopeID).HasName("CreditScopeID");
+                entity.HasIndex(e => e.CreditUsePlace).HasName("CreditUsePlace");
+                entity.HasIndex(e => e.CreditStatus).HasName("credits_ibfk_1");
+                entity.HasIndex(e => e.CreditType).HasName("credits_ibfk_2");
+                entity.HasIndex(e => e.CreditClassification).HasName("credits_ibfk_3");
+                entity.HasIndex(e => e.Currency).HasName("credits_ibfk_7");
+                
+                entity.HasMany(c => c.CreditOwners);
+                entity.HasMany(c => c.Guarantors);                
+
+                entity.ToTable("Credits");
+
+            });
+
+            modelBuilder.Entity<CreditOwner>(entity =>
+            {
+                entity.HasIndex(e => e.PersonID).HasName("CreditOwners_PersonID");
+                entity.HasIndex(e => e.SourceID).HasName("CreditOwners_SourceID");
+                entity.HasIndex(e => e.CreditID).HasName("CreditOwners_CreditID");
+                entity.HasIndex(e => e.OrganizationID).HasName("OrganizationID");
+
+               // entity.HasOne(g => g.Credit);
+                   //.WithMany(c => c.CreditOwners);
+
+                entity.ToTable("CreditOwners");
+            });
+
+            modelBuilder.Entity<Guarantor>(entity =>
+            {
+                entity.HasIndex(e => e.CreditID).HasName("Guarantors_CreditID");
+                entity.HasIndex(e => e.PersonID).HasName("Guarantors_PersonID");
+                entity.HasIndex(e => e.OrganizationID).HasName("Guarantors_OrganizationID");
+                entity.HasIndex(e => e.SourceID).HasName("Guarantors_SourceID");
+
+                entity.HasMany(g => g.GuaranteeCancellations);
+                // entity.HasOne(g => g.Credit);
+                    //.WithMany(c => c.Guarantors);
+
+
+                entity.ToTable("Guarantors");
+            });
+
+            modelBuilder.Entity<GuaranteeCancellation>(entity =>
+            {
+                entity.Property(gc => gc.CancellationDate).HasColumnType("date");
+
+               // entity.HasOne(g => g.Guarantor);
+                    // .WithMany(c => c.GuaranteeCancellations);
+
+                entity.ToTable("GuaranteeCancellation");
+            });
+
+            modelBuilder.Entity<OrgOwner>(entity =>
+            {
+                entity.HasKey(e => e.OrgOwnerID);
+
+                entity.HasIndex(e => new { e.OrganizationID, e.PersonID, e.OwnerOrgID })
+                    .HasName("OrganizationID");
+
+                entity.ToTable("OrgOwners");
+            });
+
+            modelBuilder.Entity<DicCountries>(entity =>
+            {
+                entity.HasKey(e => e.CountryId);
+
+                entity.HasIndex(e => e.Country)
+                    .HasName("Country")
+                    .IsUnique();
+
+                entity.HasIndex(e => e.CountryShortName)
+                    .HasName("CountryShortName")
+                    .IsUnique();
+
+                entity.Property(e => e.CountryId).HasColumnType("int(11)");
+
+                entity.Property(e => e.Country).HasMaxLength(50);
+
+                entity.Property(e => e.CountryShortName).HasColumnType("char(2)");
+            });
+
+            modelBuilder.Entity<DicResident>(entity =>
+            {
+                entity.HasKey(e => e.ResidentId);
+
+                entity.Property(e => e.ResidentId)
+                    .HasColumnName("ResidentID")
+                    .HasColumnType("int(11)");
+
+                entity.Property(e => e.Resident).HasMaxLength(200);
+            });
+
+            modelBuilder.Entity<DicSex>(entity =>
+            {
+                entity.HasKey(e => e.SexId);
+
+                entity.Property(e => e.SexId).HasColumnName("SexID");
+
+                entity.Property(e => e.Sex).HasMaxLength(100);
+            });
+
+            modelBuilder.Entity<DicSynonym>(entity =>
+            {
+                entity.HasKey(e => e.ID);
+            });
+
+            modelBuilder.Entity<OrganizationNames>(entity =>
+            {
+                entity.HasKey(e => e.OrganizationNameId);
+
+                entity.HasIndex(e => e.OrganizationId)
+                    .HasName("OrganizationNames_OrganizationID");
+
+                entity.HasIndex(e => e.OrganizationName)
+                    .HasName("OrganizationNames_OrganizationName");
+
+                entity.Property(e => e.OrganizationNameId)
+                    .HasColumnName("OrganizationNameID")
+                    .HasColumnType("int(11)");
+
+                entity.Property(e => e.IncomingDate).HasColumnType("datetime");
+
+                entity.Property(e => e.OrganizationId)
+                    .HasColumnName("OrganizationID")
+                    .HasColumnType("int(11)");
+
+                entity.Property(e => e.OrganizationName).HasMaxLength(200);
+
+                entity.Property(e => e.SourceId)
+                    .HasColumnName("SourceID")
+                    .HasColumnType("int(11)");
+
+                entity.Property(e => e.ValidFlag).HasColumnType("tinyint(4)");
+            });
+
+            modelBuilder.Entity<Organization>(entity =>
+            {
+                entity.HasKey(e => e.OrganizationId);
+
+                entity.HasIndex(e => e.Hvhh)
+                    .HasName("HVHH")
+                    .IsUnique();
+
+                entity.HasIndex(e => e.OrgPropertyTypeId)
+                    .HasName("OrgPropertyTypeID");
+
+                entity.HasIndex(e => e.OrganizationType)
+                    .HasName("organizations_ibfk_1");
+
+                entity.HasIndex(e => e.ResidentId)
+                    .HasName("organizations_ibfk_3");
+
+                entity.HasIndex(e => e.SourceId)
+                    .HasName("organizations_ibfk_4");
+
+                entity.HasIndex(e => e.StateRegistryNumber)
+                    .HasName("Organizations_StateRegistryNumber");
+
+                entity.Property(e => e.OrganizationId)
+                    .HasColumnName("OrganizationID")
+                    .HasColumnType("int(11)");
+
+                entity.Property(e => e.Hvhh)
+                    .IsRequired()
+                    .HasColumnName("HVHH")
+                    .HasMaxLength(30)
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.IncomingDate)
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("'0000-00-00 00:00:00'");
+
+                entity.Property(e => e.OrgPropertyTypeId)
+                    .HasColumnName("OrgPropertyTypeID")
+                    .HasColumnType("int(11)");
+
+                entity.Property(e => e.OrganizationType).HasColumnType("int(11)");
+
+                entity.Property(e => e.ResidentId)
+                    .HasColumnName("ResidentID")
+                    .HasColumnType("int(11)");
+
+                entity.Property(e => e.SourceId)
+                    .HasColumnName("SourceID")
+                    .HasColumnType("int(11)")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.FoundationDate).HasColumnName("FoundationDate").HasColumnType("date");
+
+                entity.Property(e => e.StateRegistryNumber)
+                    .HasMaxLength(100)
+                    .HasDefaultValueSql("''");
+            }
+            );
+
+            modelBuilder.Entity<ReceivedPackage>(entity =>
+            {
+                entity.HasKey(e => e.RPId);
+
+                entity.Property(e => e.RPId)
+                    .HasColumnName("RPID")
+                    .HasColumnType("int(11)");
+
+                entity.Property(e => e.UserId)
+                    .HasColumnName("UserID")
+                    .HasColumnType("int(11)");
+
+                entity.Property(e => e.PackageSourceId)
+                   .HasColumnName("PackageSourceID")
+                   .HasColumnType("int(11)");
+
+                entity.Property(e => e.FileStatus).HasDefaultValue(0);
+
+                entity.Property(e => e.UploadDate).HasDefaultValueSql("'0000-00-00 00:00:00'");
+                entity.Property(e => e.StartDate).HasDefaultValueSql("'0000-00-00 00:00:00'");
+                entity.Property(e => e.EndDate).HasDefaultValueSql("'0000-00-00 00:00:00'");
+
+                entity.ToTable("ReceivedPackages");              
+            });
+
+            modelBuilder.Entity<ReceivedPacket>(entity =>
+            {
+                entity.HasKey(e => e.ReceivedPackageID);                
+
+                entity.ToTable("ReceivedPackets");
+            });
+
+            modelBuilder.Entity<PackageFile>(entity =>
+            {
+                entity.HasKey(e => e.PackageFileID);
+
+                entity.ToTable("PackageFiles");
+            });
+
+            modelBuilder.Entity<ScorePerson>(entity =>
+            {
+                entity.HasKey(e => e.PersonID);
+
+                entity.HasIndex(e => e.ScorePersonID).HasName("ScorePersonID");
+                entity.HasIndex(e => e.IncomingDate).HasName("IncomingDate");
+                entity.HasIndex(e => e.Status).HasName("Status");
+
+                entity.ToTable("ScorePersons");
+            });
+
+
+
+            modelBuilder.Entity<AcraPersonsBySource>(entity =>
+            {
+                entity.HasKey(e => e.AutoID);
+                entity.Property(e => e.Status).HasDefaultValue(1);
+                entity.HasIndex(e => e.ACRAID).HasName("IX_ACRAID");
+                entity.HasIndex(e => new { e.SourceID , e.ACRAID, e.Status}).HasName("IX_BySources");                
+
+                entity.ToTable("AcraPersonsBySource");
+            });
+
+
+            modelBuilder.Entity<MonitoringPlusByAcraID>(entity =>
+            {
+                entity.HasKey(e => e.AutoID);
+                
+                entity.HasIndex(e => e.ACRAID).HasName("IX_ByACRAID");
+                entity.HasIndex(e => new { e.InfoDate, e.ACRAID }).HasName("IX_ByDate");
+
+                entity.ToTable("MonitoringPlusByAcraID");
+            });
+
+
+            modelBuilder.Entity<BankIDs>(entity =>
+            {
+                entity.Property(e=>e.BankID).HasColumnType("varchar(20)");
+                entity.Property(e => e.FirstName).HasColumnType("varchar(200)");
+                entity.Property(e => e.LastName).HasColumnType("varchar(200)");
+                entity.Property(e => e.PassportNum).HasColumnType("varchar(30)");
+                entity.Property(e => e.SocialCard).HasColumnType("varchar(20)");
+                entity.Property(e => e.HasNSocialCard).HasColumnType("varchar(20)");
+
+                entity.HasKey(e => new { e.BankID, e.FirstName, e.LastName, e.PassportNum, e.SocialCard });
+
+               // entity.HasIndex(e => new { e.BankID,e.FirstName, e.LastName, e.PassportNum,e.SocialCard }).HasName("IX_Key").IsUnique();
+                entity.HasIndex(e => e.BankID).HasName("BankID");
+                entity.HasIndex(e => e.FirstName).HasName("FirstName");
+                entity.HasIndex(e => e.LastName).HasName("LastName");
+                entity.HasIndex(e => e.PassportNum).HasName("PassportNum");
+                entity.HasIndex(e => e.SocialCard).HasName("SocialCard");
+                entity.HasIndex(e => e.HasNSocialCard).HasName("HasNSocialCard");
+                entity.HasIndex(e => e.BirthDate).HasName("BirthDate");
+                entity.HasIndex(e => new { e.FirstName, e.LastName, e.SocialCard }).HasName("PersonID");
+                
+                entity.ToTable("BankIDs");
+            });
+
+
+            modelBuilder.Entity<BankIDLegal>(entity =>
+            {
+                entity.Property(e => e.BankID).HasColumnType("varchar(20)");
+                entity.Property(e => e.Name).HasColumnType("varchar(200)");
+                entity.Property(e => e.ANTP).HasColumnType("varchar(20)");
+
+                entity.HasKey(e => e.BankID);
+
+                entity.HasIndex(e => e.BankID).HasName("BankID").IsUnique();
+                entity.HasIndex(e => e.Name).HasName("Name");
+                entity.HasIndex(e => e.ANTP).HasName("ANTP");
+                entity.HasIndex(e => new { e.Name, e.ANTP }).HasName("Info");
+
+
+                entity.ToTable("BankIDsLegal");
+            });
+
+            modelBuilder.Entity<MonitoringPlus_Source>(entity =>
+            {
+                entity.HasKey(e => e.SourceID);
+
+                entity.HasIndex(e => e.ResultSourceID).HasName("ResultSourceID");
+              
+                entity.ToTable("MonitoringPlus_Sources");
+            });
+            modelBuilder.Entity<ACRAID_MAPPER>(entity =>
+            {
+                entity.Property(e => e.ID).ValueGeneratedOnAdd().HasColumnType("MEDIUMINT UNSIGNED");
+                entity.HasKey(e => e.ID);
+                
+                entity.Property(e => e.ACRAID).HasColumnType("bigint(20)");
+                entity.Property(e => e.PersonID).HasColumnType("int(11)");
+                entity.Property(e => e.MatchingID).HasColumnType("tinyint(3)");
+                entity.Property(e => e.GenerationDate).HasColumnType("date");
+                entity.ToTable("ACRAID_MAPPER");
+            });
+            modelBuilder.Entity<AcraID_Errors>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedOnAdd().HasColumnType("MEDIUMINT UNSIGNED");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.PersonId).HasColumnType("int(11)");
+                entity.Property(e => e.Isavv).HasColumnType("int(1)");
+                entity.Property(e => e.Status).HasColumnType("int(3)");
+                entity.Property(e => e.Field).HasColumnType("varchar(50)");
+                entity.Property(e => e.Value1).HasColumnType("varchar(50)");
+                entity.Property(e => e.Value2).HasColumnType("varchar(50)");
+                entity.Property(e => e.Date).HasColumnType("datetime");
+            });
+
+            modelBuilder.Entity<Pek_Definition>(entity =>
+            {
+                entity.HasKey(e => e.id);
+
+                entity.HasIndex(e => e.parameter).HasName("parameter");
+
+                entity.HasIndex(e => e.acceptablevalue).HasName("acceptablevalue");
+            });
+
+            modelBuilder.Entity<Pek_ActivityLog>(entity =>
+            {
+                entity.HasKey(e => e.id);
+
+                entity.HasIndex(e => e.message).HasName("message");
+
+                entity.HasIndex(e => e.userActivityId).HasName("userActivityId");
+
+                entity.HasIndex(e => e.date).HasName("date");
+            });
+
+
+            ////Remove cascading deletes
+            //foreach (var relationship in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
+            //{
+            //    relationship.DeleteBehavior = DeleteBehavior.Restrict;
+            //}
+
+            //base.OnModelCreating(modelBuilder);
+
+        }
+    }
+}

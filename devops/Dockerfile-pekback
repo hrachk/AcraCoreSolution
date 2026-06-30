@@ -1,0 +1,25 @@
+# Use the official .NET SDK image to build the app
+FROM nexus:8123/dotnet5/sdk:5.0 AS build
+
+WORKDIR /src
+
+# Copy solution and project files
+COPY . .
+
+# Restore dependencies
+RUN dotnet restore AcraCoreSolution.sln
+
+# Build the project
+RUN dotnet build PekBackService/PekBackService.csproj -c Release
+
+# Publish the project
+RUN dotnet publish PekBackService/PekBackService.csproj -c Release -o /app/publish --self-contained true -r linux-x64
+
+# Use a runtime image for the final container
+FROM nexus:8123/dotnet5/aspnet:5.0 AS runtime
+
+WORKDIR /app
+COPY --from=build /app/publish ./
+
+# Set the entrypoint
+ENTRYPOINT ["dotnet", "PekBackService.dll"]

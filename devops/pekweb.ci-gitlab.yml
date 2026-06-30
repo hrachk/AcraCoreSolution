@@ -1,0 +1,140 @@
+stages:
+- build
+- deploy
+
+variables: 
+# Nexus Repo
+  NEXUS_HOST: nexus:8123
+# Development
+  DEV_NETWORK: acra_dev_docker_net
+  DEV_PEKWEB: dev-acra-pekweb/acrapekweb
+  DEV_IMAGE_PEKWEB: pekweb-dev
+  DEV_PORT_8: 9068
+# Production
+  PROD_NETWORK: prod_docker_net
+  PROD_PEKWEB: prod-acra-pekweb/acrapekweb
+  PROD_IMAGE_PEKWEB: pekweb-prod
+  PROD_PORT_8: 9068
+
+########### PEKWEB ###########
+
+######## Development ###########
+#---------  BUILD  ----------#
+
+acrapekweb_dev:
+  stage: build
+  only:
+    - "develop"
+  tags:
+   - "multirunner-1"
+   - docker
+  script:
+   - sleep 5
+   - docker login $NEXUS_HOST -u "$NEXUS_USER" -p "$NEXUS_PASSWORD"
+   - docker build -f devops/Dockerfile-pekweb . -t $NEXUS_HOST/$DEV_PEKWEB:$CI_PIPELINE_ID
+   - docker push $NEXUS_HOST/$DEV_PEKWEB:$CI_PIPELINE_ID
+
+#----------  DEPLOY  ----------#
+
+deploy_acrapekweb_dev:
+  stage: deploy
+  only:
+    - "develop"
+  tags:
+   - "multirunner-1"
+   - docker
+  needs:
+    - acrapekweb_dev
+  script:
+    - |
+      sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no devops@$devrunner <<EOF
+      docker login $NEXUS_HOST -u "$NEXUS_USER" -p "$NEXUS_PASSWORD"
+      docker pull $NEXUS_HOST/$DEV_PEKWEB:$CI_PIPELINE_ID
+      docker stop $DEV_IMAGE_PEKWEB || true
+      docker rm $DEV_IMAGE_PEKWEB || true
+      docker run -d \
+      --name $DEV_IMAGE_PEKWEB \
+      --network $DEV_NETWORK \
+      --restart always \
+      -p $DEV_PORT_8:$DEV_PORT_8 \
+      -v /etc/localtime:/etc/localtime:ro \
+      -v /etc/timezone:/etc/timezone:ro \
+      -v /opt/acra/settings/pekweb-dev/appsettings.json:/app/appsettings.json:ro \
+      $NEXUS_HOST/$DEV_PEKWEB:$CI_PIPELINE_ID
+      
+      echo "Waiting for container to initialize..."
+      sleep 10
+      if docker ps --format "table {{.Names}}\t{{.Status}}" | grep -q "$DEV_IMAGE_PEKWEB.*Up"; then
+        echo "Container $DEV_IMAGE_PEKWEB is running"
+        echo "Recent logs:"
+        docker logs --tail 20 $DEV_IMAGE_PEKWEB
+      else
+        echo "Container $DEV_IMAGE_PEKWEB failed to start"
+        echo "Container status:"
+        docker ps -a --filter name=$DEV_IMAGE_PEKWEB
+        echo "Container logs:"
+        docker logs $DEV_IMAGE_PEKWEB
+        exit 1
+      fi
+      EOF
+
+
+########### Production ###########
+#---------  BUILD  ----------#
+
+acrapekweb_prod:
+  stage: build
+  only:
+   - "master"
+  tags:
+   - "multirunner-1"
+   - docker
+  script:
+   - sleep 5
+   - docker login $NEXUS_HOST -u "$NEXUS_USER" -p "$NEXUS_PASSWORD"
+   - docker build -f devops/Dockerfile-pekweb . -t $NEXUS_HOST/$PROD_PEKWEB:$CI_PIPELINE_ID
+   - docker push $NEXUS_HOST/$PROD_PEKWEB:$CI_PIPELINE_ID
+
+#----------  DEPLOY  ----------#
+
+deploy_acrapekweb_prod:
+  stage: deploy
+  only:
+    - "master"
+  tags:
+   - "multirunner-1"
+   - docker
+  needs:
+    - acrapekweb_prod
+  script:
+    - |
+      sshpass -p "$PROD_SSH_PASSWORD" ssh -o StrictHostKeyChecking=no devops@$dockrunner <<EOF
+      docker login $NEXUS_HOST -u "$NEXUS_USER" -p "$NEXUS_PASSWORD"
+      docker pull $NEXUS_HOST/$PROD_PEKWEB:$CI_PIPELINE_ID
+      docker stop $PROD_IMAGE_PEKWEB || true
+      docker rm $PROD_IMAGE_PEKWEB || true
+      docker run -d \
+      --name $PROD_IMAGE_PEKWEB \
+      --network $PROD_NETWORK \
+      --restart always \
+      -p $PROD_PORT_8:$PROD_PORT_8 \
+      -v /etc/localtime:/etc/localtime:ro \
+      -v /etc/timezone:/etc/timezone:ro \
+      -v /opt/acra/settings/pekweb-prod/appsettings.json:/app/appsettings.json:ro \
+      $NEXUS_HOST/$PROD_PEKWEB:$CI_PIPELINE_ID
+      
+      echo "Waiting for container to initialize..."
+      sleep 10
+      if docker ps --format "table {{.Names}}\t{{.Status}}" | grep -q "$PROD_IMAGE_PEKWEB.*Up"; then
+        echo "Container $PROD_IMAGE_PEKWEB is running"
+        echo "Recent logs:"
+        docker logs --tail 20 $PROD_IMAGE_PEKWEB
+      else
+        echo "Container $PROD_IMAGE_PEKWEB failed to start"
+        echo "Container status:"
+        docker ps -a --filter name=$PROD_IMAGE_PEKWEB
+        echo "Container logs:"
+        docker logs $PROD_IMAGE_PEKWEB
+        exit 1
+      fi
+      EOF

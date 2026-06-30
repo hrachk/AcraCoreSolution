@@ -1,0 +1,139 @@
+stages:
+- build
+- deploy
+
+variables: 
+# Nexus repo
+  NEXUS_HOST: nexus:8123
+# Development
+  DEV_NETWORK: acra_dev_docker_net
+  DEV_EKENG: dev-acra-ekeng/acraekeng
+  DEV_IMAGE_EKENG: ekeng-dev
+  DEV_PORT_3: 9070
+# Production
+  PROD_NETWORK: prod_docker_net
+  PROD_EKENG: prod-acra-ekeng/acraekeng
+  PROD_IMAGE_EKENG: ekeng-prod
+  PROD_PORT_3: 9070
+  
+########### EKENG ###########
+
+########### Development ##########
+#---------  BUILD  ---------#
+
+acraekeng_dev:
+  stage: build
+  only:
+    - "develop"
+  tags:
+   - "multirunner-1"
+   - docker
+  script:
+   - sleep 5
+   - docker login $NEXUS_HOST -u "$NEXUS_USER" -p "$NEXUS_PASSWORD"
+   - docker build -f devops/Dockerfile-ekeng . -t $NEXUS_HOST/$DEV_EKENG:$CI_PIPELINE_ID
+   - docker push $NEXUS_HOST/$DEV_EKENG:$CI_PIPELINE_ID
+
+#----------  DEPLOY  ----------#
+
+deploy_ekeng_dev:
+  stage: deploy
+  only:
+    - "develop"
+  tags:
+   - "multirunner-1"
+   - docker
+  needs:
+    - acraekeng_dev
+  script:
+    - |
+      sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no devops@$devrunner <<EOF
+      docker login $NEXUS_HOST -u "$NEXUS_USER" -p "$NEXUS_PASSWORD"
+      docker pull $NEXUS_HOST/$DEV_EKENG:$CI_PIPELINE_ID
+      docker stop $DEV_IMAGE_EKENG || true
+      docker rm $DEV_IMAGE_EKENG || true
+      docker run -d \
+        --name $DEV_IMAGE_EKENG \
+        --network $DEV_NETWORK \
+        --restart always \
+        -p $DEV_PORT_3:$DEV_PORT_3  \
+        -v /etc/localtime:/etc/localtime:ro \
+        -v /etc/timezone:/etc/timezone:ro \
+        -v /opt/acra/settings/ekeng-dev/appsettings.json:/app/appsettings.json:ro \
+        $NEXUS_HOST/$DEV_EKENG:$CI_PIPELINE_ID
+      
+      echo "Waiting for container to initialize..."
+      sleep 10
+      if docker ps --format "table {{.Names}}\t{{.Status}}" | grep -q "$DEV_IMAGE_EKENG.*Up"; then
+        echo "Container $DEV_IMAGE_EKENG is running"
+        echo "Recent logs :"
+        docker logs --tail 20 $DEV_IMAGE_EKENG
+      else
+        echo "Container $DEV_IMAGE_EKENG failed to start"
+        echo "Container status:"
+        docker ps -a --filter name=$DEV_IMAGE_EKENG
+        echo "Container logs:"
+        docker logs $DEV_IMAGE_EKENG
+        exit 1
+      fi
+      EOF
+
+########### Production ###########
+#---------  BUILD  ---------#
+
+acraekeng_prod:
+  stage: build
+  only:
+    - "master"
+  tags:
+   - "multirunner-1"
+   - docker
+  script:
+   - sleep 5
+   - docker login $NEXUS_HOST -u "$NEXUS_USER" -p "$NEXUS_PASSWORD"
+   - docker build -f devops/Dockerfile-ekeng . -t $NEXUS_HOST/$PROD_EKENG:$CI_PIPELINE_ID
+   - docker push $NEXUS_HOST/$PROD_EKENG:$CI_PIPELINE_ID
+
+#----------  DEPLOY  ----------#
+
+deploy_ekeng_prod:
+  stage: deploy
+  only:
+    - "master"
+  tags:
+   - "multirunner-1"
+   - docker
+  needs:
+    - acraekeng_prod
+  script:
+    - |
+      sshpass -p "$PROD_SSH_PASSWORD" ssh -o StrictHostKeyChecking=no devops@$dockrunner <<EOF
+      docker login $NEXUS_HOST -u "$NEXUS_USER" -p "$NEXUS_PASSWORD"
+      docker pull $NEXUS_HOST/$PROD_EKENG:$CI_PIPELINE_ID
+      docker stop $PROD_IMAGE_EKENG || true
+      docker rm $PROD_IMAGE_EKENG || true
+      docker run -d \
+        --name $PROD_IMAGE_EKENG \
+        --network $PROD_NETWORK \
+        --restart always \
+        -p $DEV_PORT_3:$DEV_PORT_3  \
+        -v /etc/localtime:/etc/localtime:ro \
+        -v /etc/timezone:/etc/timezone:ro \
+        -v /opt/acra/settings/ekeng-prod/appsettings.json:/app/appsettings.json:ro \
+        $NEXUS_HOST/$PROD_EKENG:$CI_PIPELINE_ID
+      
+      echo "Waiting for container to initialize..."
+      sleep 10
+      if docker ps --format "table {{.Names}}\t{{.Status}}" | grep -q "$PROD_IMAGE_EKENG.*Up"; then
+        echo "Container $PROD_IMAGE_EKENG is running"
+        echo "Recent logs :"
+        docker logs --tail 20 $PROD_IMAGE_EKENG
+      else
+        echo "Container $PROD_IMAGE_EKENG failed to start"
+        echo "Container status:"
+        docker ps -a --filter name=$PROD_IMAGE_EKENG
+        echo "Container logs:"
+        docker logs $PROD_IMAGE_EKENG
+        exit 1
+      fi
+      EOF

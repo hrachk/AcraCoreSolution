@@ -1,0 +1,139 @@
+stages:
+- build
+- deploy
+
+variables: 
+# Nexus repo
+  NEXUS_HOST: nexus:8123
+# Development
+  DEV_NETWORK: acra_dev_docker_net
+  DEV_PEKBACK: dev-acra-pekback/acrapekback
+  DEV_IMAGE_PEKBACK: pekback-dev
+  DEV_PORT_7: 9069
+# Production
+  PROD_NETWORK: prod_docker_net
+  PROD_PEKBACK: prod-acra-pekback/acrapekback
+  PROD_IMAGE_PEKBACK: pekback-prod
+  PROD_PORT_7: 9069  
+
+########### PEKBACK ###########
+
+########### Development ###########
+#----------  BUILD  ----------#
+
+acrapekback_dev:
+  stage: build
+  only:
+    - "develop"
+  tags:
+   - "multirunner-1"
+   - docker
+  script:
+   - sleep 5
+   - docker login $NEXUS_HOST -u "$NEXUS_USER" -p "$NEXUS_PASSWORD"
+   - docker build -f devops/Dockerfile-pekback . -t $NEXUS_HOST/$DEV_PEKBACK:$CI_PIPELINE_ID
+   - docker push $NEXUS_HOST/$DEV_PEKBACK:$CI_PIPELINE_ID
+
+#----------  DEPLOY  ----------#
+
+deploy_acrapekback_dev:
+  stage: deploy
+  only:
+    - "develop"
+  tags:
+   - "multirunner-1"
+   - docker
+  needs:
+    - acrapekback_dev
+  script:
+    - |
+      sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no devops@$devrunner <<EOF
+      docker login $NEXUS_HOST -u "$NEXUS_USER" -p "$NEXUS_PASSWORD"
+      docker pull $NEXUS_HOST/$DEV_PEKBACK:$CI_PIPELINE_ID
+      docker stop $DEV_IMAGE_PEKBACK || true
+      docker rm $DEV_IMAGE_PEKBACK || true
+      docker run -d \
+      --name $DEV_IMAGE_PEKBACK \
+      --network $DEV_NETWORK \
+      --restart always \
+      -p $DEV_PORT_7:$DEV_PORT_7 \
+      -v /etc/localtime:/etc/localtime:ro \
+      -v /etc/timezone:/etc/timezone:ro \
+      -v /opt/acra/settings/pekback-dev/appsettings.json:/app/appsettings.json:ro \
+      $NEXUS_HOST/$DEV_PEKBACK:$CI_PIPELINE_ID
+      
+      echo "Waiting for container to initialize..."
+      sleep 10
+      if docker ps --format "table {{.Names}}\t{{.Status}}" | grep -q "$DEV_IMAGE_PEKBACK.*Up"; then
+        echo "Container $DEV_IMAGE_PEKBACK is running"
+        echo "Recent logs:"
+        docker logs --tail 20 $DEV_IMAGE_PEKBACK
+      else
+        echo "Container $DEV_IMAGE_PEKBACK failed to start"
+        echo "Container status:"
+        docker ps -a --filter name=$DEV_IMAGE_PEKBACK
+        echo "Container logs:"
+        docker logs $DEV_IMAGE_PEKBACK
+        exit 1
+      fi
+      EOF
+
+########### Production ###########
+#----------  BUILD  ----------#
+
+acrapekback_prod:
+  stage: build
+  only:
+    - "master"
+  tags:
+   - "multirunner-1"
+   - docker
+  script:
+   - sleep 5
+   - docker login $NEXUS_HOST -u "$NEXUS_USER" -p "$NEXUS_PASSWORD"
+   - docker build -f devops/Dockerfile-pekback . -t $NEXUS_HOST/$PROD_PEKBACK:$CI_PIPELINE_ID
+   - docker push $NEXUS_HOST/$PROD_PEKBACK:$CI_PIPELINE_ID
+
+#----------  DEPLOY  ----------#
+
+deploy_acrapekback_prod:
+  stage: deploy
+  only:
+    - "master"
+  tags:
+   - "multirunner-1"
+   - docker
+  needs:
+    - acrapekback_prod
+  script:
+    - |
+      sshpass -p "$PROD_SSH_PASSWORD" ssh -o StrictHostKeyChecking=no devops@$dockrunner <<EOF
+      docker login $NEXUS_HOST -u "$NEXUS_USER" -p "$NEXUS_PASSWORD"
+      docker pull $NEXUS_HOST/$PROD_PEKBACK:$CI_PIPELINE_ID
+      docker stop $PROD_IMAGE_PEKBACK || true
+      docker rm $PROD_IMAGE_PEKBACK || true
+      docker run -d \
+      --name $PROD_IMAGE_PEKBACK \
+      --network $PROD_NETWORK \
+      --restart always \
+      -p $PROD_PORT_7:$PROD_PORT_7 \
+      -v /etc/localtime:/etc/localtime:ro \
+      -v /etc/timezone:/etc/timezone:ro \
+      -v /opt/acra/settings/pekback-prod/appsettings.json:/app/appsettings.json:ro \
+      $NEXUS_HOST/$PROD_PEKBACK:$CI_PIPELINE_ID
+      
+      echo "Waiting for container to initialize..."
+      sleep 10
+      if docker ps --format "table {{.Names}}\t{{.Status}}" | grep -q "$PROD_IMAGE_PEKBACK.*Up"; then
+        echo "Container $PROD_IMAGE_PEKBACK is running"
+        echo "Recent logs:"
+        docker logs --tail 20 $PROD_IMAGE_PEKBACK
+      else
+        echo "Container $PROD_IMAGE_PEKBACK failed to start"
+        echo "Container status:"
+        docker ps -a --filter name=$PROD_IMAGE_PEKBACK
+        echo "Container logs:"
+        docker logs $PROD_IMAGE_PEKBACK
+        exit 1
+      fi
+      EOF

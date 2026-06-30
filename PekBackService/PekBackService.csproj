@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+		<SelfContained>true</SelfContained>
+
+		<!-- publish optimization -->
+		<PublishSingleFile>true</PublishSingleFile>
+		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+		<PublishTrimmed>false</PublishTrimmed>
+		
+		<EnableCompressionInPublish>false</EnableCompressionInPublish>
+		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+		<InvariantGlobalization>true</InvariantGlobalization>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Elastic.Clients.Elasticsearch" Version="9.3.2" />
+		<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.0" />
+		<PackageReference Include="System.Private.ServiceModel" Version="4.10.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\AcraData\AcraData.csproj" />
+		<ProjectReference Include="..\AcraIDServices\AcraIDServices.csproj" />
+		<ProjectReference Include="..\AcraUtils\AcraUtils.csproj" /> 
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Remove="wwwroot\**" />
+	</ItemGroup>
+
+</Project>

@@ -1,0 +1,139 @@
+stages:
+- build
+- deploy
+
+variables: 
+# Nexus repo
+  NEXUS_HOST: nexus:8123
+# Development
+  DEV_NETWORK: acra_dev_docker_net
+  DEV_CHECKUPBACK: dev-acra-checkupback/checkupback
+  DEV_IMAGE_CHECKUPBACK: checkupback-dev
+  DEV_PORT_1: 9052
+# Production
+  PROD_NETWORK: prod_docker_net
+  PROD_CHECKUPBACK: prod-acra-checkupback/checkupback
+  PROD_IMAGE_CHECKUPBACK: checkupback-prod
+  PROD_PORT_1: 9052
+
+########### CHECKUPBACK ###########
+
+########### Development ###########
+#--------------  BUILD  -------------#
+
+checkupback_dev:
+  stage: build
+  only:
+    - "develop"
+  tags:
+   - "multirunner-1"
+   - docker
+  script:
+    - sleep 5
+    - docker login $NEXUS_HOST -u "$NEXUS_USER" -p "$NEXUS_PASSWORD"
+    - docker build -f devops/Dockerfile-CheckUpBackEnd . -t $NEXUS_HOST/$DEV_CHECKUPBACK:$CI_PIPELINE_ID
+    - docker push $NEXUS_HOST/$DEV_CHECKUPBACK:$CI_PIPELINE_ID
+
+#----------  DEPLOY  ----------#
+
+deploy_checkupback_dev:
+  stage: deploy
+  only:
+    - "develop"
+  tags:
+   - "multirunner-1"
+   - docker
+  needs:
+    - checkupback_dev
+  script:
+    - |
+      sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no devops@$devrunner <<EOF
+      docker login $NEXUS_HOST -u "$NEXUS_USER" -p "$NEXUS_PASSWORD"
+      docker pull $NEXUS_HOST/$DEV_CHECKUPBACK:$CI_PIPELINE_ID
+      docker stop $DEV_IMAGE_CHECKUPBACK || true
+      docker rm $DEV_IMAGE_CHECKUPBACK || true
+      docker run -d \
+        --name $DEV_IMAGE_CHECKUPBACK \
+        --network $DEV_NETWORK \
+        --restart always \
+        -p $DEV_PORT_1:$DEV_PORT_1 \
+        -v /opt/acra/settings/checkupback-dev/appsettings.json:/app/appsettings.json:ro \
+        -v /etc/localtime:/etc/localtime:ro \
+        -v /etc/timezone:/etc/timezone:ro \
+        $NEXUS_HOST/$DEV_CHECKUPBACK:$CI_PIPELINE_ID
+      
+      echo "Waiting for container to initialize..."
+      sleep 10
+      if docker ps --format "table {{.Names}}\t{{.Status}}" | grep -q "$DEV_IMAGE_CHECKUPBACK.*Up"; then
+        echo "Container $DEV_IMAGE_CHECKUPBACK is running"
+        echo "Recent logs:"
+        docker logs --tail 20 $DEV_IMAGE_CHECKUPBACK
+      else
+        echo "Container $DEV_IMAGE_CHECKUPBACK failed to start"
+        echo "Container status:"
+        docker ps -a --filter name=$DEV_IMAGE_CHECKUPBACK
+        echo "Container logs:"
+        docker logs $DEV_IMAGE_CHECKUPBACK
+        exit 1
+      fi
+      EOF
+
+############# Production #############
+#--------------  BUILD  -------------#
+
+checkupback_prod:
+  stage: build
+  only:
+    - "master"
+  tags:
+   - "multirunner-1"
+   - docker
+  script:
+    - sleep 5
+    - docker login $NEXUS_HOST -u "$NEXUS_USER" -p "$NEXUS_PASSWORD"
+    - docker build -f devops/Dockerfile-CheckUpBackEnd . -t $NEXUS_HOST/$PROD_CHECKUPBACK:$CI_PIPELINE_ID
+    - docker push $NEXUS_HOST/$PROD_CHECKUPBACK:$CI_PIPELINE_ID
+
+#----------  DEPLOY  ----------#
+
+deploy_checkupback_prod:
+  stage: deploy
+  only:
+    - "master"
+  tags:
+   - "multirunner-1"
+   - docker
+  needs:
+    - checkupback_prod
+  script:
+    - |
+      sshpass -p "$PROD_SSH_PASSWORD" ssh -o StrictHostKeyChecking=no devops@$dockrunner <<EOF
+      docker login $NEXUS_HOST -u "$NEXUS_USER" -p "$NEXUS_PASSWORD"
+      docker pull $NEXUS_HOST/$PROD_CHECKUPBACK:$CI_PIPELINE_ID
+      docker stop $PROD_IMAGE_CHECKUPBACK || true
+      docker rm $PROD_IMAGE_CHECKUPBACK || true
+      docker run -d \
+        --name $PROD_IMAGE_CHECKUPBACK \
+        --network $PROD_NETWORK \
+        --restart always \
+        -p $PROD_PORT_1:$PROD_PORT_1 \
+        -v /opt/acra/settings/checkupback-prod/appsettings.json:/app/appsettings.json:ro \
+        -v /etc/localtime:/etc/localtime:ro \
+        -v /etc/timezone:/etc/timezone:ro \
+        $NEXUS_HOST/$PROD_CHECKUPBACK:$CI_PIPELINE_ID
+      
+      echo "Waiting for container to initialize..."
+      sleep 10
+      if docker ps --format "table {{.Names}}\t{{.Status}}" | grep -q "$PROD_IMAGE_CHECKUPBACK.*Up"; then
+        echo "Container $PROD_IMAGE_CHECKUPBACK is running"
+        echo "Recent logs:"
+        docker logs --tail 20 $PROD_IMAGE_CHECKUPBACK
+      else
+        echo "Container $PROD_IMAGE_CHECKUPBACK failed to start"
+        echo "Container status:"
+        docker ps -a --filter name=$PROD_IMAGE_CHECKUPBACK
+        echo "Container logs:"
+        docker logs $PROD_IMAGE_CHECKUPBACK
+        exit 1
+      fi
+      EOF

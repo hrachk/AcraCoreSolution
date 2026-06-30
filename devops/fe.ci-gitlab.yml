@@ -1,0 +1,139 @@
+stages:
+- build
+- deploy
+
+variables: 
+# Nexus repo
+  NEXUS_HOST: nexus:8123
+# Development
+  DEV_NETWORK: acra_dev_docker_net
+  DEV_FE: dev-acra-fe/acraidentityfe
+  DEV_IMAGE_FE: identityfe-dev
+  DEV_PORT_4: 9066
+# Production
+  PROD_NETWORK: prod_docker_net
+  PROD_FE: prod-acra-fe/acraidentityfe
+  PROD_IMAGE_FE: identityfe-prod
+  PROD_PORT_4: 9066
+  
+########### FE ###########
+
+########### Development ###########
+#---------  BUILD  ---------#
+
+acraidentityfe_dev:
+  stage: build
+  only:
+    - "develop"
+  tags:
+   - "multirunner-1"
+   - docker
+  script:
+   - sleep 5
+   - docker login $NEXUS_HOST -u "$NEXUS_USER" -p "$NEXUS_PASSWORD"
+   - docker build -f devops/Dockerfile-IdentityFE . -t $NEXUS_HOST/$DEV_FE:$CI_PIPELINE_ID
+   - docker push $NEXUS_HOST/$DEV_FE:$CI_PIPELINE_ID
+
+#----------  DEPLOY  ----------#
+
+deploy_identityfe_dev:
+  stage: deploy
+  only:
+    - "develop"
+  tags:
+   - "multirunner-1"
+   - docker
+  needs:
+    - acraidentityfe_dev
+  script:
+    - |
+      sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no devops@$devrunner <<EOF
+      docker login $NEXUS_HOST -u "$NEXUS_USER" -p "$NEXUS_PASSWORD"
+      docker pull $NEXUS_HOST/$DEV_FE:$CI_PIPELINE_ID
+      docker stop $DEV_IMAGE_FE || true
+      docker rm $DEV_IMAGE_FE || true
+      docker run -d \
+        --name $DEV_IMAGE_FE \
+        --network $DEV_NETWORK \
+        --restart always \
+        -p $DEV_PORT_4:$DEV_PORT_4 \
+        -v /etc/localtime:/etc/localtime:ro \
+        -v /etc/timezone:/etc/timezone:ro \
+        -v /opt/acra/settings/identityfe-dev/appsettings.json:/app/appsettings.json:ro \
+        $NEXUS_HOST/$DEV_FE:$CI_PIPELINE_ID
+      
+      echo "Waiting for container to initialize..."
+      sleep 10
+      if docker ps --format "table {{.Names}}\t{{.Status}}" | grep -q "$DEV_IMAGE_FE.*Up"; then
+        echo "Container $DEV_IMAGE_FE is running"
+        echo "Recent logs:"
+        docker logs --tail 20 $DEV_IMAGE_FE
+      else
+        echo "Container $DEV_IMAGE_FE failed to start"
+        echo "Container status:"
+        docker ps -a --filter name=$DEV_IMAGE_FE
+        echo "Container logs:"
+        docker logs $DEV_IMAGE_FE
+        exit 1
+      fi
+      EOF
+
+########### Production ###########
+#---------  BUILD  ---------#
+
+acraidentityfe_prod:
+  stage: build
+  only:
+    - "master"
+  tags:
+   - "multirunner-1"
+   - docker
+  script:
+   - sleep 5
+   - docker login $NEXUS_HOST -u "$NEXUS_USER" -p "$NEXUS_PASSWORD"
+   - docker build -f devops/Dockerfile-IdentityFE . -t $NEXUS_HOST/$PROD_FE:$CI_PIPELINE_ID
+   - docker push $NEXUS_HOST/$PROD_FE:$CI_PIPELINE_ID
+
+#----------  DEPLOY  ----------#
+
+deploy_identityfe_prod:
+  stage: deploy
+  only:
+    - "master"
+  tags:
+   - "multirunner-1"
+   - docker
+  needs:
+    - acraidentityfe_prod
+  script:
+    - |
+      sshpass -p "$PROD_SSH_PASSWORD" ssh -o StrictHostKeyChecking=no devops@$dockrunner <<EOF
+      docker login $NEXUS_HOST -u "$NEXUS_USER" -p "$NEXUS_PASSWORD"
+      docker pull $NEXUS_HOST/$PROD_FE:$CI_PIPELINE_ID
+      docker stop $PROD_IMAGE_FE || true
+      docker rm $PROD_IMAGE_FE || true
+      docker run -d \
+        --name $PROD_IMAGE_FE \
+        --network $PROD_NETWORK \
+        --restart always \
+        -p $PROD_PORT_4:$PROD_PORT_4 \
+        -v /etc/localtime:/etc/localtime:ro \
+        -v /etc/timezone:/etc/timezone:ro \
+        -v /opt/acra/settings/identityfe-prod/appsettings.json:/app/appsettings.json:ro \
+        $NEXUS_HOST/$PROD_FE:$CI_PIPELINE_ID
+      
+      echo "Waiting for container to initialize..."
+      sleep 10
+      if docker ps --format "table {{.Names}}\t{{.Status}}" | grep -q "$PROD_IMAGE_FE.*Up"; then
+        echo "Container $PROD_IMAGE_FE is running"
+        echo "Recent logs:"
+        docker logs --tail 20 $PROD_IMAGE_FE
+      else
+        echo "Container $PROD_IMAGE_FE failed to start"
+        echo "Container status:"
+        docker ps -a --filter name=$PROD_IMAGE_FE
+        echo "Container logs:"
+        docker logs $PROD_IMAGE_FE
+        exit 1
+      fi
+      EOF

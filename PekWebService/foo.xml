@@ -1,0 +1,460 @@
+<?xml version="1.0" encoding="utf-16"?>
+<Response xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <errorCode xmlns="http://www.taxservice.am/tp3/acra/definitions">00</errorCode>
+  <errorMessage xmlns="http://www.taxservice.am/tp3/acra/definitions">Հաջողությամբ ավարտվեց</errorMessage>
+  <ResponseDate xmlns="http://www.taxservice.am/tp3/acra/definitions">23/11/2020 22:08:10</ResponseDate>
+  <RefNum xmlns="http://www.taxservice.am/tp3/acra/definitions">1001606154879660</RefNum>
+  <RequestDate xmlns="http://www.taxservice.am/tp3/acra/definitions">23/11/2020 22:07:59</RequestDate>
+  <TIN xmlns="http://www.taxservice.am/tp3/acra/definitions">00000019</TIN>
+  <TaxType xmlns="http://www.taxservice.am/tp3/acra/definitions">ԱԱՀ վճարող</TaxType>
+  <OrgStatus xmlns="http://www.taxservice.am/tp3/acra/definitions">Լուծարման գործընթացում</OrgStatus>
+  <RegistrationDate xmlns="http://www.taxservice.am/tp3/acra/definitions">24/05/1995</RegistrationDate>
+  <OrganizationType xmlns="http://www.taxservice.am/tp3/acra/definitions">C3.3 Կազմակերպություն</OrganizationType>
+  <OrganizationName xmlns="http://www.taxservice.am/tp3/acra/definitions">ԼՈՒՍԱՐԹ</OrganizationName>
+  <OrgJurLocation xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <Region>ԵՐԵՎԱՆ</Region>
+    <Community>ԱՐԱԲԿԻՐ</Community>
+    <Location>ԱՐԱԲԿԻՐ ԹԱՂԱՄԱՍ</Location>
+    <Street>ՎԱՐԴԱՆ ՄԱՄԻԿՈՆՅԱՆ Փ.1</Street>
+    <Building>1shenq</Building>
+    <BuildingType> </BuildingType>
+    <Apartment>9</Apartment>
+  </OrgJurLocation>
+  <OrgInFactLocations xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <Region>ԵՐԵՎԱՆ</Region>
+    <Community>ԱՎԱՆ</Community>
+    <Location>ԱՎԱՆ ԹԱՂԱՄԱՍ</Location>
+    <Street>Մամիկոնյանց</Street>
+    <Building>5/1</Building>
+    <BuildingType> </BuildingType>
+    <Apartment> </Apartment>
+  </OrgInFactLocations>
+  <OrgActivities xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <OrgActivity>C31.01.0 Գրասենյակների և խանութների կահավորման կահույքի արտադրություն</OrgActivity>
+    <ActivityProportion>100</ActivityProportion>
+  </OrgActivities>
+  <TaxDebts xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <TaxDebtType>01</TaxDebtType>
+    <TaxReportPeriod>12/2019</TaxReportPeriod>
+    <ReportUpdateDate>25/05/2020</ReportUpdateDate>
+    <TaxDebt>0</TaxDebt>
+    <OutstandingTaxDebt>a</OutstandingTaxDebt>
+    <TaxFinePenalty>0</TaxFinePenalty>
+    <TaxOverpayment>0</TaxOverpayment>
+  </TaxDebts>
+  <TaxDebts xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <TaxDebtType>02</TaxDebtType>
+    <TaxReportPeriod>22/2020</TaxReportPeriod>
+    <ReportUpdateDate>30/04/2020</ReportUpdateDate>
+    <TaxDebt>0</TaxDebt>
+    <OutstandingTaxDebt>a</OutstandingTaxDebt>
+    <TaxFinePenalty>0</TaxFinePenalty>
+    <TaxOverpayment>0</TaxOverpayment>
+  </TaxDebts>
+  <TaxDebts xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <TaxDebtType>03</TaxDebtType>
+    <TaxReportPeriod>12/2019</TaxReportPeriod>
+    <ReportUpdateDate>25/05/2020</ReportUpdateDate>
+    <TaxDebt>0</TaxDebt>
+    <OutstandingTaxDebt>a</OutstandingTaxDebt>
+    <TaxFinePenalty>0</TaxFinePenalty>
+    <TaxOverpayment>0</TaxOverpayment>
+  </TaxDebts>
+  <TaxDebts xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <TaxDebtType>50</TaxDebtType>
+    <TaxReportPeriod>22/2018</TaxReportPeriod>
+    <ReportUpdateDate>11/09/2020</ReportUpdateDate>
+    <TaxDebt>0</TaxDebt>
+    <OutstandingTaxDebt>563509178</OutstandingTaxDebt>
+    <TaxFinePenalty>856358767</TaxFinePenalty>
+    <TaxOverpayment>0</TaxOverpayment>
+  </TaxDebts>
+  <TaxDebts xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <TaxDebtType>52</TaxDebtType>
+    <TaxReportPeriod>01/2020</TaxReportPeriod>
+    <ReportUpdateDate>05/06/2020</ReportUpdateDate>
+    <TaxDebt>0</TaxDebt>
+    <OutstandingTaxDebt>11500</OutstandingTaxDebt>
+    <TaxFinePenalty>4077</TaxFinePenalty>
+    <TaxOverpayment>0</TaxOverpayment>
+  </TaxDebts>
+  <TaxDebts xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <TaxDebtType>56</TaxDebtType>
+    <TaxReportPeriod>22/2020</TaxReportPeriod>
+    <ReportUpdateDate>22/06/2020</ReportUpdateDate>
+    <TaxDebt>0</TaxDebt>
+    <OutstandingTaxDebt>a</OutstandingTaxDebt>
+    <TaxFinePenalty>0</TaxFinePenalty>
+    <TaxOverpayment>0</TaxOverpayment>
+  </TaxDebts>
+  <TaxDebts xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <TaxDebtType>58</TaxDebtType>
+    <TaxReportPeriod>01/2020</TaxReportPeriod>
+    <ReportUpdateDate>21/05/2020</ReportUpdateDate>
+    <TaxDebt>0</TaxDebt>
+    <OutstandingTaxDebt>1345</OutstandingTaxDebt>
+    <TaxFinePenalty>184</TaxFinePenalty>
+    <TaxOverpayment>638</TaxOverpayment>
+  </TaxDebts>
+  <TaxDebts xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <TaxDebtType>60</TaxDebtType>
+    <TaxReportPeriod />
+    <ReportUpdateDate>29/09/2020</ReportUpdateDate>
+    <TaxDebt>0</TaxDebt>
+    <OutstandingTaxDebt>9178064</OutstandingTaxDebt>
+    <TaxFinePenalty>2137098</TaxFinePenalty>
+    <TaxOverpayment>0</TaxOverpayment>
+  </TaxDebts>
+  <TaxDebts xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <TaxDebtType>62</TaxDebtType>
+    <TaxReportPeriod />
+    <ReportUpdateDate>29/09/2020</ReportUpdateDate>
+    <TaxDebt>0</TaxDebt>
+    <OutstandingTaxDebt>a</OutstandingTaxDebt>
+    <TaxFinePenalty>0</TaxFinePenalty>
+    <TaxOverpayment>0</TaxOverpayment>
+  </TaxDebts>
+  <TaxDebts xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <TaxDebtType>64</TaxDebtType>
+    <TaxReportPeriod />
+    <ReportUpdateDate>29/09/2020</ReportUpdateDate>
+    <TaxDebt>0</TaxDebt>
+    <OutstandingTaxDebt>27000</OutstandingTaxDebt>
+    <TaxFinePenalty>38</TaxFinePenalty>
+    <TaxOverpayment>0</TaxOverpayment>
+  </TaxDebts>
+  <OrgSalaryFund xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <SalaryFund>1056000</SalaryFund>
+    <TaxPeriod>03/2020</TaxPeriod>
+    <UpdateDate>24/04/2020</UpdateDate>
+  </OrgSalaryFund>
+  <EmployeesNumbers xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <EmployeesNumber>4</EmployeesNumber>
+    <TaxPeriod>03/2020</TaxPeriod>
+    <UpdateDate>24/04/2020</UpdateDate>
+  </EmployeesNumbers>
+  <TaxesPaid xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <TaxesPaidSum>543</TaxesPaidSum>
+    <TaxPaidType>58</TaxPaidType>
+    <TaxPeriod>01/2020</TaxPeriod>
+    <UpdateDate>14/05/2020</UpdateDate>
+  </TaxesPaid>
+  <ProductsAndServicesPurchases xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <ProductsServicesPurchase>56456</ProductsServicesPurchase>
+    <TaxPeriod>02/2019</TaxPeriod>
+    <UpdateDate>26/04/2019</UpdateDate>
+  </ProductsAndServicesPurchases>
+  <ProductsAndServicesPurchases xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <ProductsServicesPurchase>546546</ProductsServicesPurchase>
+    <TaxPeriod>02/2019</TaxPeriod>
+    <UpdateDate>26/04/2019</UpdateDate>
+  </ProductsAndServicesPurchases>
+  <ProductsAndServicesPurchases xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <ProductsServicesPurchase>456</ProductsServicesPurchase>
+    <TaxPeriod>03/2019</TaxPeriod>
+    <UpdateDate>26/04/2019</UpdateDate>
+  </ProductsAndServicesPurchases>
+  <ProductsAndServicesPurchases xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <ProductsServicesPurchase>456456</ProductsServicesPurchase>
+    <TaxPeriod>03/2019</TaxPeriod>
+    <UpdateDate>26/04/2019</UpdateDate>
+  </ProductsAndServicesPurchases>
+  <ProductsAndServicesPurchases xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <ProductsServicesPurchase>90000000</ProductsServicesPurchase>
+    <TaxPeriod>04/2019</TaxPeriod>
+    <UpdateDate>26/04/2019</UpdateDate>
+  </ProductsAndServicesPurchases>
+  <ProductsAndServicesPurchases xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <ProductsServicesPurchase>8000000</ProductsServicesPurchase>
+    <TaxPeriod>04/2019</TaxPeriod>
+    <UpdateDate>26/04/2019</UpdateDate>
+  </ProductsAndServicesPurchases>
+  <ProductsAndServicesPurchases xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <ProductsServicesPurchase>15505538</ProductsServicesPurchase>
+    <TaxPeriod>21/2019</TaxPeriod>
+    <UpdateDate>16/09/2019</UpdateDate>
+  </ProductsAndServicesPurchases>
+  <ProductInStock xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <Fieldname>Հումք (նյութեր), կիսապատրաստուկներ</Fieldname>
+    <Fieldvalue>0</Fieldvalue>
+    <TaxReportPeriod>00/2019</TaxReportPeriod>
+    <UpdateDate>30/01/2019</UpdateDate>
+  </ProductInStock>
+  <ProductInStock xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <Fieldname>Անավարտ արտադրություն</Fieldname>
+    <Fieldvalue>0</Fieldvalue>
+    <TaxReportPeriod>00/2019</TaxReportPeriod>
+    <UpdateDate>30/01/2019</UpdateDate>
+  </ProductInStock>
+  <ProductInStock xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <Fieldname>Պատրաստի արտադրանք</Fieldname>
+    <Fieldvalue>0</Fieldvalue>
+    <TaxReportPeriod>00/2019</TaxReportPeriod>
+    <UpdateDate>30/01/2019</UpdateDate>
+  </ProductInStock>
+  <ProductInStock xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <Fieldname>Ապրանքներ</Fieldname>
+    <Fieldvalue>0</Fieldvalue>
+    <TaxReportPeriod>00/2019</TaxReportPeriod>
+    <UpdateDate>30/01/2019</UpdateDate>
+  </ProductInStock>
+  <SalesTurnover xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <SalesTurnoverAmount>0</SalesTurnoverAmount>
+    <SalesTurnoverType>ԱԱՀ հարկով աշխատող</SalesTurnoverType>
+    <TaxReportPeriod>01/2019</TaxReportPeriod>
+    <UpdateDate>19/02/2019</UpdateDate>
+  </SalesTurnover>
+  <SalesTurnover xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <SalesTurnoverAmount>6615644055</SalesTurnoverAmount>
+    <SalesTurnoverType>ԱԱՀ հարկով աշխատող</SalesTurnoverType>
+    <TaxReportPeriod>02/2019</TaxReportPeriod>
+    <UpdateDate>26/04/2019</UpdateDate>
+  </SalesTurnover>
+  <SalesTurnover xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <SalesTurnoverAmount>6491522053</SalesTurnoverAmount>
+    <SalesTurnoverType>ԱԱՀ հարկով աշխատող</SalesTurnoverType>
+    <TaxReportPeriod>03/2019</TaxReportPeriod>
+    <UpdateDate>26/04/2019</UpdateDate>
+  </SalesTurnover>
+  <SalesTurnover xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <SalesTurnoverAmount>16821022698526</SalesTurnoverAmount>
+    <SalesTurnoverType>ԱԱՀ հարկով աշխատող</SalesTurnoverType>
+    <TaxReportPeriod>04/2019</TaxReportPeriod>
+    <UpdateDate>26/04/2019</UpdateDate>
+  </SalesTurnover>
+  <SalesTurnover xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <SalesTurnoverAmount>1000</SalesTurnoverAmount>
+    <SalesTurnoverType>ԱԱՀ հարկով աշխատող</SalesTurnoverType>
+    <TaxReportPeriod>05/2019</TaxReportPeriod>
+    <UpdateDate>30/12/2019</UpdateDate>
+  </SalesTurnover>
+  <SalesTurnover xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <SalesTurnoverAmount>0</SalesTurnoverAmount>
+    <SalesTurnoverType>ԱԱՀ հարկով աշխատող</SalesTurnoverType>
+    <TaxReportPeriod>12/2019</TaxReportPeriod>
+    <UpdateDate>25/05/2020</UpdateDate>
+  </SalesTurnover>
+  <SalesTurnover xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <SalesTurnoverAmount>29813237</SalesTurnoverAmount>
+    <SalesTurnoverType>Շրջանառության հարկով աշխատող</SalesTurnoverType>
+    <TaxReportPeriod>21/2019</TaxReportPeriod>
+    <UpdateDate>16/09/2019</UpdateDate>
+  </SalesTurnover>
+  <TaxableProfit xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <TaxableProfitAmount>0</TaxableProfitAmount>
+    <TaxPeriod>00/2019</TaxPeriod>
+    <UpdateDate>30/01/2019</UpdateDate>
+  </TaxableProfit>
+  <TotalAssets xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <FixedAssets>0</FixedAssets>
+    <CashEquivalents>0</CashEquivalents>
+    <ProvidedAdvances>0</ProvidedAdvances>
+    <TaxPeriod>00/2019</TaxPeriod>
+    <UpdateDate>30/01/2019</UpdateDate>
+    <AccountsReceivable>
+      <Fieldname>Դեբիտորական պարտքեր բյուջեներին</Fieldname>
+      <Fieldvalue>0</Fieldvalue>
+    </AccountsReceivable>
+    <AccountsReceivable>
+      <Fieldname>Դեբիտորական պարտքեր սոցիալական վճարների մասով</Fieldname>
+      <Fieldvalue>0</Fieldvalue>
+    </AccountsReceivable>
+    <AccountsReceivable>
+      <Fieldname>Դեբիտորական պարտքեր աշխատավարձի մասով</Fieldname>
+      <Fieldvalue>0</Fieldvalue>
+    </AccountsReceivable>
+    <AccountsReceivable>
+      <Fieldname>Դեբիտորական պարտքեր շահաբաժինների մասով</Fieldname>
+      <Fieldvalue>0</Fieldvalue>
+    </AccountsReceivable>
+    <AccountsReceivable>
+      <Fieldname>Այլ դեբիտորական պարտքեր</Fieldname>
+      <Fieldvalue>0</Fieldvalue>
+    </AccountsReceivable>
+  </TotalAssets>
+  <TotalLiabilities xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <AdvancesReceived>0</AdvancesReceived>
+    <TaxPeriod>00/2019</TaxPeriod>
+    <UpdateDate>30/01/2019</UpdateDate>
+    <AccountsPayable>
+      <Fieldname>Այլ պարտավորություններ</Fieldname>
+      <Fieldvalue>0</Fieldvalue>
+      <TaxReportPeriod>00/2019</TaxReportPeriod>
+      <UpdateDate>30/01/2019</UpdateDate>
+    </AccountsPayable>
+    <AccountsPayable>
+      <Fieldname>Կրեդիտորական պարտքեր բյուջեներին</Fieldname>
+      <Fieldvalue>0</Fieldvalue>
+      <TaxReportPeriod>00/2019</TaxReportPeriod>
+      <UpdateDate>30/01/2019</UpdateDate>
+    </AccountsPayable>
+    <AccountsPayable>
+      <Fieldname>Կրեդիտորական պարտքեր սոցիալական վճարների մասով</Fieldname>
+      <Fieldvalue>0</Fieldvalue>
+      <TaxReportPeriod>00/2019</TaxReportPeriod>
+      <UpdateDate>30/01/2019</UpdateDate>
+    </AccountsPayable>
+    <AccountsPayable>
+      <Fieldname>Կրեդիտորական պարտքեր աշխատավարձի մասով</Fieldname>
+      <Fieldvalue>0</Fieldvalue>
+      <TaxReportPeriod>00/2019</TaxReportPeriod>
+      <UpdateDate>30/01/2019</UpdateDate>
+    </AccountsPayable>
+    <AccountsPayable>
+      <Fieldname>Կրեդիտորական պարտքեր շահաբաժինների մասով</Fieldname>
+      <Fieldvalue>0</Fieldvalue>
+      <TaxReportPeriod>00/2019</TaxReportPeriod>
+      <UpdateDate>30/01/2019</UpdateDate>
+    </AccountsPayable>
+    <AccountsPayable>
+      <Fieldname>Կրեդիտորական պարտքեր գնումների մասով</Fieldname>
+      <Fieldvalue>0</Fieldvalue>
+      <TaxReportPeriod>00/2019</TaxReportPeriod>
+      <UpdateDate>30/01/2019</UpdateDate>
+    </AccountsPayable>
+    <AccountsPayable>
+      <Fieldname>Այլ կրեդիտորական պարտքեր</Fieldname>
+      <Fieldvalue>0</Fieldvalue>
+      <TaxReportPeriod>00/2019</TaxReportPeriod>
+      <UpdateDate>30/01/2019</UpdateDate>
+    </AccountsPayable>
+  </TotalLiabilities>
+  <DeclLastCorrection xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <DeclName>Ավելացված արժեքի հարկի և ակցիզային հարկի միասնական հաշվարկ</DeclName>
+    <LastCorrectDate>26/04/2019</LastCorrectDate>
+    <CorrectField>ՀՀ տարածք ներմուծված ապրանքների</CorrectField>
+    <CorrectFieldValue>56456</CorrectFieldValue>
+  </DeclLastCorrection>
+  <DeclLastCorrection xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <DeclName>Ավելացված արժեքի հարկի և ակցիզային հարկի միասնական հաշվարկ</DeclName>
+    <LastCorrectDate>26/04/2019</LastCorrectDate>
+    <CorrectField>Ընդամենը ԱԱՀ-ի կրեդիտ</CorrectField>
+    <CorrectFieldValue>6615644055</CorrectFieldValue>
+  </DeclLastCorrection>
+  <DeclLastCorrection xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <DeclName>Ավելացված արժեքի հարկի և ակցիզային հարկի միասնական հաշվարկ</DeclName>
+    <LastCorrectDate>26/04/2019</LastCorrectDate>
+    <CorrectField>ՀՀ տարածքում ձեռք բերված ապրանքների և ծառայությունների</CorrectField>
+    <CorrectFieldValue>546546</CorrectFieldValue>
+  </DeclLastCorrection>
+  <DeclLastCorrection xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <DeclName>Հաշվարկ՝ ռեզիդենտ շահութահարկ վճարողի և մշտական հաստատության միջոցով Հայաստանի Հանրապետությունում գործունեություն իրականացնող ոչ ռեզիդենտ շահութահարկ վճարողի շահութահարկի</DeclName>
+    <LastCorrectDate>30/01/2019</LastCorrectDate>
+    <CorrectField>Ստացված կանխավճարներ</CorrectField>
+    <CorrectFieldValue>0</CorrectFieldValue>
+  </DeclLastCorrection>
+  <DeclLastCorrection xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <DeclName>Հաշվարկ՝ ռեզիդենտ շահութահարկ վճարողի և մշտական հաստատության միջոցով Հայաստանի Հանրապետությունում գործունեություն իրականացնող ոչ ռեզիդենտ շահութահարկ վճարողի շահութահարկի</DeclName>
+    <LastCorrectDate>30/01/2019</LastCorrectDate>
+    <CorrectField>Այլ պարտավորություններ</CorrectField>
+    <CorrectFieldValue>0</CorrectFieldValue>
+  </DeclLastCorrection>
+  <DeclLastCorrection xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <DeclName>Հաշվարկ՝ ռեզիդենտ շահութահարկ վճարողի և մշտական հաստատության միջոցով Հայաստանի Հանրապետությունում գործունեություն իրականացնող ոչ ռեզիդենտ շահութահարկ վճարողի շահութահարկի</DeclName>
+    <LastCorrectDate>30/01/2019</LastCorrectDate>
+    <CorrectField>Հումք (նյութեր), կիսապատրաստուկներ</CorrectField>
+    <CorrectFieldValue>0</CorrectFieldValue>
+  </DeclLastCorrection>
+  <DeclLastCorrection xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <DeclName>Հաշվարկ՝ ռեզիդենտ շահութահարկ վճարողի և մշտական հաստատության միջոցով Հայաստանի Հանրապետությունում գործունեություն իրականացնող ոչ ռեզիդենտ շահութահարկ վճարողի շահութահարկի</DeclName>
+    <LastCorrectDate>30/01/2019</LastCorrectDate>
+    <CorrectField>Անավարտ արտադրություն</CorrectField>
+    <CorrectFieldValue>0</CorrectFieldValue>
+  </DeclLastCorrection>
+  <DeclLastCorrection xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <DeclName>Հաշվարկ՝ ռեզիդենտ շահութահարկ վճարողի և մշտական հաստատության միջոցով Հայաստանի Հանրապետությունում գործունեություն իրականացնող ոչ ռեզիդենտ շահութահարկ վճարողի շահութահարկի</DeclName>
+    <LastCorrectDate>30/01/2019</LastCorrectDate>
+    <CorrectField>Պատրաստի արտադրանք</CorrectField>
+    <CorrectFieldValue>0</CorrectFieldValue>
+  </DeclLastCorrection>
+  <DeclLastCorrection xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <DeclName>Հաշվարկ՝ ռեզիդենտ շահութահարկ վճարողի և մշտական հաստատության միջոցով Հայաստանի Հանրապետությունում գործունեություն իրականացնող ոչ ռեզիդենտ շահութահարկ վճարողի շահութահարկի</DeclName>
+    <LastCorrectDate>30/01/2019</LastCorrectDate>
+    <CorrectField>Ապրանքներ</CorrectField>
+    <CorrectFieldValue>0</CorrectFieldValue>
+  </DeclLastCorrection>
+  <DeclLastCorrection xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <DeclName>Հաշվարկ՝ ռեզիդենտ շահութահարկ վճարողի և մշտական հաստատության միջոցով Հայաստանի Հանրապետությունում գործունեություն իրականացնող ոչ ռեզիդենտ շահութահարկ վճարողի շահութահարկի</DeclName>
+    <LastCorrectDate>30/01/2019</LastCorrectDate>
+    <CorrectField>Հիմնական միջոցներ</CorrectField>
+    <CorrectFieldValue>0</CorrectFieldValue>
+  </DeclLastCorrection>
+  <DeclLastCorrection xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <DeclName>Հաշվարկ՝ ռեզիդենտ շահութահարկ վճարողի և մշտական հաստատության միջոցով Հայաստանի Հանրապետությունում գործունեություն իրականացնող ոչ ռեզիդենտ շահութահարկ վճարողի շահութահարկի</DeclName>
+    <LastCorrectDate>30/01/2019</LastCorrectDate>
+    <CorrectField>Դրամական միջոցներ</CorrectField>
+    <CorrectFieldValue>0</CorrectFieldValue>
+  </DeclLastCorrection>
+  <DeclLastCorrection xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <DeclName>Հաշվարկ՝ ռեզիդենտ շահութահարկ վճարողի և մշտական հաստատության միջոցով Հայաստանի Հանրապետությունում գործունեություն իրականացնող ոչ ռեզիդենտ շահութահարկ վճարողի շահութահարկի</DeclName>
+    <LastCorrectDate>30/01/2019</LastCorrectDate>
+    <CorrectField>Դեբիտորական պարտքեր բյուջեներին</CorrectField>
+    <CorrectFieldValue>0</CorrectFieldValue>
+  </DeclLastCorrection>
+  <DeclLastCorrection xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <DeclName>Հաշվարկ՝ ռեզիդենտ շահութահարկ վճարողի և մշտական հաստատության միջոցով Հայաստանի Հանրապետությունում գործունեություն իրականացնող ոչ ռեզիդենտ շահութահարկ վճարողի շահութահարկի</DeclName>
+    <LastCorrectDate>30/01/2019</LastCorrectDate>
+    <CorrectField>Դեբիտորական պարտքեր սոցիալական վճարների մասով</CorrectField>
+    <CorrectFieldValue>0</CorrectFieldValue>
+  </DeclLastCorrection>
+  <DeclLastCorrection xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <DeclName>Հաշվարկ՝ ռեզիդենտ շահութահարկ վճարողի և մշտական հաստատության միջոցով Հայաստանի Հանրապետությունում գործունեություն իրականացնող ոչ ռեզիդենտ շահութահարկ վճարողի շահութահարկի</DeclName>
+    <LastCorrectDate>30/01/2019</LastCorrectDate>
+    <CorrectField>Դեբիտորական պարտքեր աշխատավարձի մասով</CorrectField>
+    <CorrectFieldValue>0</CorrectFieldValue>
+  </DeclLastCorrection>
+  <DeclLastCorrection xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <DeclName>Հաշվարկ՝ ռեզիդենտ շահութահարկ վճարողի և մշտական հաստատության միջոցով Հայաստանի Հանրապետությունում գործունեություն իրականացնող ոչ ռեզիդենտ շահութահարկ վճարողի շահութահարկի</DeclName>
+    <LastCorrectDate>30/01/2019</LastCorrectDate>
+    <CorrectField>Դեբիտորական պարտքեր շահաբաժինների մասով</CorrectField>
+    <CorrectFieldValue>0</CorrectFieldValue>
+  </DeclLastCorrection>
+  <DeclLastCorrection xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <DeclName>Հաշվարկ՝ ռեզիդենտ շահութահարկ վճարողի և մշտական հաստատության միջոցով Հայաստանի Հանրապետությունում գործունեություն իրականացնող ոչ ռեզիդենտ շահութահարկ վճարողի շահութահարկի</DeclName>
+    <LastCorrectDate>30/01/2019</LastCorrectDate>
+    <CorrectField>Այլ դեբիտորական պարտքեր</CorrectField>
+    <CorrectFieldValue>0</CorrectFieldValue>
+  </DeclLastCorrection>
+  <DeclLastCorrection xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <DeclName>Հաշվարկ՝ ռեզիդենտ շահութահարկ վճարողի և մշտական հաստատության միջոցով Հայաստանի Հանրապետությունում գործունեություն իրականացնող ոչ ռեզիդենտ շահութահարկ վճարողի շահութահարկի</DeclName>
+    <LastCorrectDate>30/01/2019</LastCorrectDate>
+    <CorrectField>Տրված կանխավճարներ</CorrectField>
+    <CorrectFieldValue>0</CorrectFieldValue>
+  </DeclLastCorrection>
+  <DeclLastCorrection xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <DeclName>Հաշվարկ՝ ռեզիդենտ շահութահարկ վճարողի և մշտական հաստատության միջոցով Հայաստանի Հանրապետությունում գործունեություն իրականացնող ոչ ռեզիդենտ շահութահարկ վճարողի շահութահարկի</DeclName>
+    <LastCorrectDate>30/01/2019</LastCorrectDate>
+    <CorrectField>Կրեդիտորական պարտքեր բյուջեներին</CorrectField>
+    <CorrectFieldValue>0</CorrectFieldValue>
+  </DeclLastCorrection>
+  <DeclLastCorrection xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <DeclName>Հաշվարկ՝ ռեզիդենտ շահութահարկ վճարողի և մշտական հաստատության միջոցով Հայաստանի Հանրապետությունում գործունեություն իրականացնող ոչ ռեզիդենտ շահութահարկ վճարողի շահութահարկի</DeclName>
+    <LastCorrectDate>30/01/2019</LastCorrectDate>
+    <CorrectField>Կրեդիտորական պարտքեր սոցիալական վճարների մասով</CorrectField>
+    <CorrectFieldValue>0</CorrectFieldValue>
+  </DeclLastCorrection>
+  <DeclLastCorrection xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <DeclName>Հաշվարկ՝ ռեզիդենտ շահութահարկ վճարողի և մշտական հաստատության միջոցով Հայաստանի Հանրապետությունում գործունեություն իրականացնող ոչ ռեզիդենտ շահութահարկ վճարողի շահութահարկի</DeclName>
+    <LastCorrectDate>30/01/2019</LastCorrectDate>
+    <CorrectField>Կրեդիտորական պարտքեր աշխատավարձի մասով</CorrectField>
+    <CorrectFieldValue>0</CorrectFieldValue>
+  </DeclLastCorrection>
+  <DeclLastCorrection xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <DeclName>Հաշվարկ՝ ռեզիդենտ շահութահարկ վճարողի և մշտական հաստատության միջոցով Հայաստանի Հանրապետությունում գործունեություն իրականացնող ոչ ռեզիդենտ շահութահարկ վճարողի շահութահարկի</DeclName>
+    <LastCorrectDate>30/01/2019</LastCorrectDate>
+    <CorrectField>Կրեդիտորական պարտքեր շահաբաժինների մասով</CorrectField>
+    <CorrectFieldValue>0</CorrectFieldValue>
+  </DeclLastCorrection>
+  <DeclLastCorrection xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <DeclName>Հաշվարկ՝ ռեզիդենտ շահութահարկ վճարողի և մշտական հաստատության միջոցով Հայաստանի Հանրապետությունում գործունեություն իրականացնող ոչ ռեզիդենտ շահութահարկ վճարողի շահութահարկի</DeclName>
+    <LastCorrectDate>30/01/2019</LastCorrectDate>
+    <CorrectField>Կրեդիտորական պարտքեր գնումների մասով</CorrectField>
+    <CorrectFieldValue>0</CorrectFieldValue>
+  </DeclLastCorrection>
+  <DeclLastCorrection xmlns="http://www.taxservice.am/tp3/acra/definitions">
+    <DeclName>Հաշվարկ՝ ռեզիդենտ շահութահարկ վճարողի և մշտական հաստատության միջոցով Հայաստանի Հանրապետությունում գործունեություն իրականացնող ոչ ռեզիդենտ շահութահարկ վճարողի շահութահարկի</DeclName>
+    <LastCorrectDate>30/01/2019</LastCorrectDate>
+    <CorrectField>Այլ կրեդիտորական պարտքեր</CorrectField>
+    <CorrectFieldValue>0</CorrectFieldValue>
+  </DeclLastCorrection>
+</Response>
