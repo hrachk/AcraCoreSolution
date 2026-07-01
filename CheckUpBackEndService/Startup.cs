@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System;
 using AcraData.Data;
 using AcraUtils;
 using Easy.Logger;
@@ -14,6 +15,9 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 using Microsoft.Extensions.Hosting;
+using Elastic.Clients.Elasticsearch;
+using Elastic.Transport;
+using CheckUpBackEndService;
 
 namespace CheckUpWebService
 {
@@ -71,6 +75,29 @@ namespace CheckUpWebService
                     );
             });
 
+
+            // ── Elasticsearch ──────────────────────────────────────────────
+            services.AddSingleton<ElasticsearchClient>(sp =>
+            {
+                var cfg      = sp.GetRequiredService<IConfiguration>();
+                var url      = cfg["ElasticSearch:Uri"];
+                var username = cfg["ElasticSearch:Username"];
+                var password = cfg["ElasticSearch:Password"];
+
+                if (string.IsNullOrWhiteSpace(url))
+                    throw new Exception("ElasticSearch:Uri is missing in appsettings.json");
+
+                var settings = new ElasticsearchClientSettings(new Uri(url))
+                    .DefaultIndex($"checkup-journal-{DateTime.UtcNow:yyyy.MM.dd}")
+                    .Authentication(new BasicAuthentication(username, password))
+                    .ServerCertificateValidationCallback((_, _, _, _) => true)
+                    .EnableDebugMode();
+
+                return new ElasticsearchClient(settings);
+            });
+
+            services.AddScoped<ElasticJournalService>();
+            // ──────────────────────────────────────────────────────────────
 
             services.AddRazorPages();
 
