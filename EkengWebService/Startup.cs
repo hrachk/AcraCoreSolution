@@ -18,7 +18,6 @@ namespace EkengWebService
 {
     public class Startup
     {
-
         public IConfiguration Configuration { get; }
 
         public Startup(IWebHostEnvironment env)
