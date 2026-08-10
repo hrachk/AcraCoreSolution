@@ -54,43 +54,61 @@ namespace PekBackService
             {
                 using var context = new AcraJournalDbContext(_acraJournalOptions);
 
+                // FIX 1: Int32.Parse → TryParse. Если errorCode null/невалидный — не бросает исключение,
+                //         пишем -1 чтобы запись всё равно попала в журнал.
+                int statusCode = int.TryParse(response?.errorCode, out var parsed) ? parsed : -1;
+
                 var journalEntity = new AcraData.Models.AcraJournal.Pek_Journal
                 {
                     Request = request,
-                    Response = JsonConvert.SerializeObject(response),
+                    // FIX 2: response может быть null — защита через ?. и ?? 
+                    Response = response != null ? JsonConvert.SerializeObject(response) : string.Empty,
                     ResponseDateTime = DateTime.Now,
-                    ErrorText = response.errorMessage,
+                    ErrorText = response?.errorMessage ?? string.Empty,
                     UserActivityId = userActivityId,
-                    Status = Int32.Parse(response.errorCode),
+                    Status = statusCode,
                     SourceID = source
                 };
 
                 context.Pek_Journal.Add(journalEntity);
                 await context.SaveChangesAsync();
 
-                // Elastic
-                var doc = new PekJournalDocument
+                // Elastic — логируем отдельно, чтобы ошибка Elastic не блокировала запись в БД
+                try
                 {
-                    Request = request,
-                    Response = response,
-                    UserActivityId = userActivityId,
-                    Status = response.errorCode,
-                    SourceId = source,
-                    CreatedAt = DateTime.UtcNow
-                };
+                    var doc = new PekJournalDocument
+                    {
+                        Request = request,
+                        Response = response,
+                        UserActivityId = userActivityId,
+                        Status = response?.errorCode ?? "-1",
+                        SourceId = source,
+                        CreatedAt = DateTime.UtcNow
+                    };
 
-                await _elastic.LogAsync(doc);
+                    await _elastic.LogAsync(doc);
+                }
+                catch (Exception elasticEx)
+                {
+                    // FIX 3: ошибка Elastic не должна влиять на основной лог в БД
+                    Console.WriteLine($"{DateTime.Now} [ElasticJournalService] LogAsync failed: {elasticEx.Message}");
+                    File.AppendAllText(_logPath, $"\n\r{DateTime.Now} [Elastic] {elasticEx}\n\r");
+                }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"{DateTime.Now} Unable to log PEK journal");
-                File.AppendAllText(_logPath, $"\n\r{DateTime.Now} {ex}\n\r");
+                Console.WriteLine($"{DateTime.Now} Unable to log PEK journal: {ex.Message}");
+                File.AppendAllText(_logPath, $"\n\r{DateTime.Now} [LogJournalAsync] {ex}\n\r");
             }
         }
 
         private string ValidateResponse(PEK_ServiceReference.Response response)
         {
             string errors = string.Empty;
+
+            // FIX 4: если response null — валидировать нечего
+            if (response == null)
+                return "response_null";
 
             try
             {
@@ -111,23 +129,31 @@ namespace PekBackService
                     .Select(x => x.acceptablevalue)
                     .ToList();
 
-                foreach (var item in response.TaxDebts)
+                // FIX 5: TaxDebts может быть null
+                if (response.TaxDebts != null)
                 {
-                    if (!taxDebtType.Contains(item.TaxDebtType))
+                    foreach (var item in response.TaxDebts)
                     {
-                        errors = "taxDebtType";
-                        break;
+                        if (!taxDebtType.Contains(item.TaxDebtType))
+                        {
+                            errors = "taxDebtType";
+                            break;
+                        }
                     }
                 }
 
-                var orgType = response.OrganizationType.Contains(' ')
-                    ? response.OrganizationType.Substring(0, response.OrganizationType.IndexOf(' '))
-                    : response.OrganizationType;
+                // FIX 6: OrganizationType может быть null — было NullReferenceException на .Contains(' ')
+                if (!string.IsNullOrEmpty(response.OrganizationType))
+                {
+                    var orgType = response.OrganizationType.Contains(' ')
+                        ? response.OrganizationType.Substring(0, response.OrganizationType.IndexOf(' '))
+                        : response.OrganizationType;
 
-                if (!organizationType.Contains(orgType))
-                    errors = string.IsNullOrEmpty(errors)
-                        ? "OrganizationType"
-                        : $"{errors}&OrganizationType";
+                    if (!organizationType.Contains(orgType))
+                        errors = string.IsNullOrEmpty(errors)
+                            ? "OrganizationType"
+                            : $"{errors}&OrganizationType";
+                }
 
                 if (!errorCode.Contains(response.errorCode))
                     errors = string.IsNullOrEmpty(errors)
@@ -136,8 +162,8 @@ namespace PekBackService
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"{DateTime.Now} Validation failed");
-                File.AppendAllText(_logPath, $"\n\r{DateTime.Now} {ex}\n\r");
+                Console.WriteLine($"{DateTime.Now} Validation failed: {ex.Message}");
+                File.AppendAllText(_logPath, $"\n\r{DateTime.Now} [ValidateResponse] {ex}\n\r");
             }
 
             return errors;
