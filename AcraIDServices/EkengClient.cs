@@ -54,10 +54,12 @@ namespace AcraIDServices
         public EkengClient(Logger logger, IOptions<AcraUtils.Configuration.EkengConfig> configuration)
         {
             _logger = logger;
-            //AB: REmove try/catch
-            try
-            { _EkengConfiguration = configuration.Value; }
-            catch { }
+            if (configuration?.Value == null)
+            {
+                _logger.Log.Error("EkengConfig is null – check appsettings EkengConfiguration section");
+                throw new ArgumentNullException(nameof(configuration), "EkengConfig is required");
+            }
+            _EkengConfiguration = configuration.Value;
         }
 
         public async void GetPersonData(RequestType requestType, object Item)

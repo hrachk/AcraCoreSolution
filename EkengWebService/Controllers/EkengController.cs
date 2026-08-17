@@ -1,24 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System;
 using AcraIDServices;
 using AcraIDServices.Models;
 using Microsoft.AspNetCore.Mvc;
 using AcraUtils;
 using static AcraIDServices.EkengClient;
-using Newtonsoft.Json;
+using Microsoft.Extensions.Logging;
 
 namespace EkengWebService.Controllers
 {
     public class EkengController : Controller
     {
-        EkengClient _EkengClient;
-        Logger _logger;
-        public EkengController(EkengClient ekengClient, Logger logger)
+        private readonly EkengClient _EkengClient;
+        private readonly Logger _logger;
+        private readonly ILogger<EkengController> _msLogger;
+
+        public EkengController(EkengClient ekengClient, Logger logger, ILogger<EkengController> msLogger)
         {
             _EkengClient = ekengClient;
             _logger = logger;
+            _msLogger = msLogger;
         }
 
         public IActionResult Index()
@@ -26,79 +26,131 @@ namespace EkengWebService.Controllers
             return View();
         }
 
+        /// <summary>
+        /// Helper: never return null to client. Always log outcome.
+        /// </summary>
+        private JsonResult OkOrError(object data, string operation, string requestKey = null)
+        {
+            if (data != null)
+            {
+                _msLogger.LogInformation("{Operation} succeeded. Key={Key}", operation, requestKey);
+                return Json(data);
+            }
+
+            _msLogger.LogWarning("{Operation} returned empty/null data. Key={Key}", operation, requestKey);
+            return Json(new
+            {
+                status = "ERROR",
+                errorCode = "NO_DATA",
+                message = "External service returned no data or non-success status"
+            });
+        }
+
+        private JsonResult ErrorResult(Exception ex, string operation, string requestKey = null)
+        {
+            _logger.Log.Error($"{operation} failed. Key={requestKey}. Error: {ex.Message}");
+            _msLogger.LogError(ex, "{Operation} failed. Key={Key}", operation, requestKey);
+
+            return Json(new
+            {
+                status = "ERROR",
+                errorCode = "EXCEPTION",
+                message = ex.Message
+            });
+        }
+
         [HttpPost]
         public JsonResult GetPersonInfoBySSN([FromBody] BySSN personData)
         {
-            EkengResponse aVVResponse = new EkengResponse();
+            if (personData == null || string.IsNullOrWhiteSpace(personData.ssn))
+            {
+                _msLogger.LogWarning("GetPersonInfoBySSN called with null/empty SSN");
+                return Json(new { status = "ERROR", errorCode = "INVALID_INPUT", message = "SSN is required" });
+            }
+
             try
             {
-
                 _EkengClient.GetPersonData(RequestType.SSN, personData);
-                if (_EkengClient.Response.IsSuccessStatusCode)
-                {
-                    return Json(_EkengClient.Data);
-                    //aVVResponse = JsonConvert.DeserializeObject<EkengResponse>(_EkengClient.Response.Content.ReadAsStringAsync().Result);
 
-                    //if (aVVResponse.status == "OK")
-                    //{
-                    //    AcraUtils.OpenSSLAES256Cryptor cryptor = new OpenSSLAES256Cryptor();
-                    //    // Decode Response
-                    //}
-                    //else
-                    //{
-                    //    //Error
-                    //}
-                }
-                else
-                    return null;
+                if (_EkengClient.Response != null && _EkengClient.Response.IsSuccessStatusCode)
+                    return OkOrError(_EkengClient.Data, "GetPersonInfoBySSN", personData.ssn);
+
+                var status = _EkengClient.Response?.StatusCode.ToString() ?? "null";
+                _msLogger.LogWarning("GetPersonInfoBySSN non-success HTTP status={Status}. SSN={Ssn}", status, personData.ssn);
+                return Json(new
+                {
+                    status = "ERROR",
+                    errorCode = "HTTP_" + status,
+                    message = "Ekeng service returned non-success status"
+                });
             }
             catch (Exception ex)
             {
-                // return Json(_VxClient.Response.Content.ReadAsStringAsync().Result);
+                return ErrorResult(ex, "GetPersonInfoBySSN", personData.ssn);
             }
-
-            return Json(aVVResponse);
         }
 
+        [HttpPost]
         public JsonResult GetPersonInfoByDocument([FromBody] ByDocument personData)
         {
-            EkengResponse aVVResponse = new EkengResponse();
+            if (personData == null || string.IsNullOrWhiteSpace(personData.documentNumber))
+            {
+                _msLogger.LogWarning("GetPersonInfoByDocument called with null/empty documentNumber");
+                return Json(new { status = "ERROR", errorCode = "INVALID_INPUT", message = "Document number is required" });
+            }
+
             try
             {
                 _EkengClient.GetPersonData(RequestType.Document, personData);
-                if (_EkengClient.Response.IsSuccessStatusCode)
+
+                if (_EkengClient.Response != null && _EkengClient.Response.IsSuccessStatusCode)
+                    return OkOrError(_EkengClient.Data, "GetPersonInfoByDocument", personData.documentNumber);
+
+                var status = _EkengClient.Response?.StatusCode.ToString() ?? "null";
+                _msLogger.LogWarning("GetPersonInfoByDocument non-success HTTP status={Status}. Doc={Doc}", status, personData.documentNumber);
+                return Json(new
                 {
-                    return Json(_EkengClient.Data);                   
-                }
-                else
-                    return null;
+                    status = "ERROR",
+                    errorCode = "HTTP_" + status,
+                    message = "Ekeng service returned non-success status"
+                });
             }
             catch (Exception ex)
             {
-                // return Json(_VxClient.Response.Content.ReadAsStringAsync().Result);
+                return ErrorResult(ex, "GetPersonInfoByDocument", personData.documentNumber);
             }
-
-            return Json(aVVResponse);
         }
 
-        public IActionResult GetPersonInfoByNames([FromBody] ByName personData)
+        [HttpPost]
+        public JsonResult GetPersonInfoByNames([FromBody] ByName personData)
         {
-            EkengResponse aVVResponse = new EkengResponse();
+            if (personData == null || string.IsNullOrWhiteSpace(personData.name) || string.IsNullOrWhiteSpace(personData.surname))
+            {
+                _msLogger.LogWarning("GetPersonInfoByNames called with incomplete name data");
+                return Json(new { status = "ERROR", errorCode = "INVALID_INPUT", message = "Name and surname are required" });
+            }
+
             try
             {
-                if (_EkengClient.Response.IsSuccessStatusCode)
+                // Fixed: previously this method never called GetPersonData
+                _EkengClient.GetPersonData(RequestType.Name, personData);
+
+                if (_EkengClient.Response != null && _EkengClient.Response.IsSuccessStatusCode)
+                    return OkOrError(_EkengClient.Data, "GetPersonInfoByNames", $"{personData.surname} {personData.name}");
+
+                var status = _EkengClient.Response?.StatusCode.ToString() ?? "null";
+                _msLogger.LogWarning("GetPersonInfoByNames non-success HTTP status={Status}", status);
+                return Json(new
                 {
-                    return Json(_EkengClient.Data);
-                }
-                else
-                    return null;
+                    status = "ERROR",
+                    errorCode = "HTTP_" + status,
+                    message = "Ekeng service returned non-success status"
+                });
             }
             catch (Exception ex)
             {
-                // return Json(_VxClient.Response.Content.ReadAsStringAsync().Result);
+                return ErrorResult(ex, "GetPersonInfoByNames", $"{personData?.surname} {personData?.name}");
             }
-
-            return Json(aVVResponse);
         }
     }
 }

@@ -49,10 +49,12 @@ namespace AcraIDServices
         public AVVClient(Logger logger, IOptions<AcraUtils.Configuration.AVVConfig> configuration)
         {
             _logger = logger;
-            //AB: REmove try/catch
-            try
-            { _AVVConfiguration = configuration.Value; }
-            catch { }
+            if (configuration?.Value == null)
+            {
+                _logger.Log.Error("AVVConfig is null – check appsettings AVVConfiguration section");
+                throw new ArgumentNullException(nameof(configuration), "AVVConfig is required");
+            }
+            _AVVConfiguration = configuration.Value;
         }
 
         public async void GetPersonData(RequestType requestType, object Item)
