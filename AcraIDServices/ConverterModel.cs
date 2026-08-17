@@ -219,10 +219,17 @@ namespace AcraIDServices
                             {
                                 age = GetAge(DateTime.ParseExact(PersonInfo.BirthDate.Value.ToString().Replace("-", "/"), "yyyy/MM/dd", null));
                             }
-                            catch (Exception)
+                            catch (Exception ex)
                             {
-                                age = GetAge(DateTime.ParseExact(PersonInfo.BirthDate.Value.ToString().Replace("-", "/"), "yyyy/MM/DD", null));
-
+                                try
+                                {
+                                    age = GetAge(DateTime.ParseExact(PersonInfo.BirthDate.Value.ToString().Replace("-", "/"), "yyyy/MM/DD", null));
+                                }
+                                catch (Exception)
+                                {
+                                    _logger.Log.Error($"Unable to parse BirthDate: {PersonInfo.BirthDate?.Value}. Error: {ex.Message}");
+                                    age = 0; // fail-safe: treat as unknown age
+                                }
                             }
                         }
                     }
@@ -272,34 +279,35 @@ namespace AcraIDServices
         {
             List<AcraData.Models.Acra4.BPR_Persons> validDocs = new List<AcraData.Models.Acra4.BPR_Persons>();
             AcraData.Models.Acra4.BPR_Persons aVVPerson = new BPR_Persons();
-            if (ssn != null)
+            if (!string.IsNullOrWhiteSpace(ssn))
             {
-
                 Get3rdSourceInfoBySSN(ssn);
                 if (isEkengSuccess == false)
                 {
                     return new NonResidentRespModel() { EkengStatus = false };
                 }
-                else if (responseModel == null || responseModel.Result.Count == 0)
+                else if (responseModel == null || responseModel.Result == null || responseModel.Result.Count == 0)
                 {
                     return new NonResidentRespModel() { EkengStatus = true, IsValid = false };
                 }
-                if (responseModel != null && responseModel.Result != null && responseModel.Result.Count == 1)
+                if (responseModel.Result.Count == 1)
                 {
                     var persons = _avvMapper.ImportPerson(responseModel.Result.FirstOrDefault());
                     aVVPerson = Get3rdSourceInfoFromDBBySSN(ssn);
-                    ssn = aVVPerson.PNum;
+                    // Null-safe: DB may not have the person yet
+                    if (aVVPerson != null && !string.IsNullOrEmpty(aVVPerson.PNum))
+                        ssn = aVVPerson.PNum;
                 }
             }
 
-            validDocs = GetValidDocumentsToJson(ssn);
-            if (validDocs.Count == 0)
+            validDocs = GetValidDocumentsToJson(ssn) ?? new List<AcraData.Models.Acra4.BPR_Persons>();
+            return new NonResidentRespModel()
             {
-                return new NonResidentRespModel() { EkengStatus = true, IsValid = true, SSN = aVVPerson.PNum, Persons = validDocs };
-            }
-
-            return new NonResidentRespModel() { EkengStatus = true, IsValid = true, SSN = aVVPerson.PNum, Persons = validDocs };
-
+                EkengStatus = true,
+                IsValid = true,
+                SSN = aVVPerson?.PNum ?? ssn,
+                Persons = validDocs
+            };
         }
         public async Task<NonResidentRespModel> Validate(string document, string ssn="")
         {
@@ -689,23 +697,47 @@ namespace AcraIDServices
 
         private void Log3rdSourceRequests(HttpRequestMessage requestMessage, HttpResponseMessage responseMessage)
         {
-            //System.IO.File.AppendAllText("C:/Logs/log.txt", $"{DateTime.Now}   8" + Environment.NewLine);
             _logger.Log.Info($"Start Method: {MethodBase.GetCurrentMethod().Name}");
-            using (var context = new AcraData.Data.AcraJournalDbContext(_acraJournalOptions))
+            try
             {
+                string requestBody = string.Empty;
+                string responseBody = string.Empty;
                 try
                 {
-                     context.BPR_Transaction.AddAsync(new BPR_Transaction() {
-                        Request =  requestMessage.Content.ReadAsStringAsync().Result, 
-                        Response =   responseMessage.Content.ReadAsStringAsync().Result, 
-                        ResponseDateTime = DateTime.Now });
-
-                    context.SaveChanges();
+                    if (requestMessage?.Content != null)
+                        requestBody = requestMessage.Content.ReadAsStringAsync().Result;
                 }
                 catch (Exception ex)
                 {
-                    _logger.Log.Error($"Error Method: {MethodBase.GetCurrentMethod().Name} Error:{ex.Message}");
+                    _logger.Log.Error($"Log3rdSourceRequests: failed to read request body: {ex.Message}");
+                    requestBody = "[unreadable request]";
                 }
+                try
+                {
+                    if (responseMessage?.Content != null)
+                        responseBody = responseMessage.Content.ReadAsStringAsync().Result;
+                }
+                catch (Exception ex)
+                {
+                    _logger.Log.Error($"Log3rdSourceRequests: failed to read response body: {ex.Message}");
+                    responseBody = "[unreadable response]";
+                }
+
+                using (var context = new AcraData.Data.AcraJournalDbContext(_acraJournalOptions))
+                {
+                    context.BPR_Transaction.Add(new BPR_Transaction()
+                    {
+                        Request = requestBody,
+                        Response = responseBody,
+                        ResponseDateTime = DateTime.Now
+                    });
+                    context.SaveChanges();
+                }
+            }
+            catch (Exception ex)
+            {
+                // Journal failure must never break the main validation flow
+                _logger.Log.Error($"Error Method: {MethodBase.GetCurrentMethod().Name} Error:{ex.Message}");
             }
             _logger.Log.Info($"End Method: {MethodBase.GetCurrentMethod().Name}");
         }
