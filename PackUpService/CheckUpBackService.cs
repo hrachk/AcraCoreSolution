@@ -184,30 +184,39 @@ namespace CheckUpService
 
                 using (var DB = new Acra3DbContext(_acra3DbContextOptions))
                 {
-
-                    if (!string.IsNullOrEmpty(userName))
+                    if (string.IsNullOrEmpty(userName))
                     {
-                        var userInfo = Queryable.Where(DB.UserInfos,u => u.UserLogin == userName).SingleOrDefault();
+                        identityResponse.ErrorCode = 101;
+                        identityResponse.ErrorDesc = "Մուտքային տվյալների սխալ"; /* Wrong currUserID */
+                        identityResponse.ResponseID = string.Empty;
+                    }
+                    else
+                    {
+                        var userInfo = Queryable.Where(DB.UserInfos, u => u.UserLogin == userName).SingleOrDefault();
+
+                        // Null-safe: user not found
+                        if (userInfo == null)
+                        {
+                            identityResponse.ErrorCode = 101;
+                            identityResponse.ErrorDesc = "Մուտքային տվյալների սխալ"; /* User not found */
+                            identityResponse.ResponseID = string.Empty;
+                        }
                         /*Check Password expired Days*/
-                        // if (userInfo.Where(u => u.UserPassCreationDate == null || DbFunctions.DiffDays(u.UserPassCreationDate, DateTime.Now) < 90).Count() == 0)
-                        if (userInfo.UserPassCreationDate == null || (DateTime.Now - userInfo.UserPassCreationDate).Value.Days >= 90)
+                        else if (userInfo.UserPassCreationDate == null || (DateTime.Now - userInfo.UserPassCreationDate).Value.Days >= 90)
                         {
                             identityResponse.ErrorCode = 103;
                             identityResponse.ErrorDesc = "Գաղտնաբառի ժամկետը լրացել է"; /*Password expired*/
-
                         }
                         /*Check User Status*/
                         else if (userInfo.Status == 2)
                         {
                             identityResponse.ErrorCode = 104;
                             identityResponse.ErrorDesc = "Մուտքն արգելափակված է"; /*Disabled By Admin*/
-
                         }
                         else if (!DB.UserInterfacePrivileges.Any(p => p.UserID == userInfo.UserId && p.InterfeaceID == 5))
                         {
                             identityResponse.ErrorCode = 105;
                             identityResponse.ErrorDesc = "Փաթեթ վերբեռնելու իրավասություն առկա չէ"; /*Disabled By BankAdmin*/
-
                         }
                         else
                         {
@@ -215,54 +224,38 @@ namespace CheckUpService
                             identityResponse.ErrorDesc = "Գործողության բարեհաջող ավարտ"; /*Success*/
                         }
 
-                        LoginLog loginlog = new LoginLog();
+                        // Write LoginLog only when we have a valid user
+                        if (userInfo != null)
+                        {
+                            var loginlog = new LoginLog
+                            {
+                                UserLogin = userInfo.UserLogin,
+                                UserId = userInfo.UserId,
+                                SourceId = userInfo.ClientId,
+                                LoginDateTime = DateTime.Now,
+                                SessionId = Guid.NewGuid().ToString()
+                            };
 
-                        try
-                        { loginlog.UserLogin = userInfo.UserLogin; }
-                        catch { }
-                        try
-                        {
-                            loginlog.UserId = userInfo.UserId;
+                            DB.LoginLogs.Add(loginlog);
+                            DB.SaveChanges();
+                            identityResponse.ResponseID = loginlog.SessionId;
                         }
-                        catch { }
-                        try
-                        {
-                            loginlog.SourceId = userInfo.ClientId;
-                        }
-                        catch { }
-
-                        try
-                        {
-                            loginlog.LoginDateTime = DateTime.Now;
-                        }
-                        catch { }
-                        loginlog.SessionId = string.Empty;
-                        try
-                        {
-                            loginlog.SessionId = Guid.NewGuid().ToString();
-                        }
-                        catch { }
-
-                        DB.LoginLogs.Add(loginlog);
-                        DB.SaveChanges();
-                        identityResponse.ResponseID = loginlog.SessionId;
-                    }
-                    else
-                    {
-                        identityResponse.ErrorCode = 101;
-                        identityResponse.ErrorDesc = "Մուտքային տվյալների սխալ"; /* Wrong currUserID */
-                        identityResponse.ResponseID = string.Empty;
                     }
                 }
 
-
-                _logger.Log.Info("PackUpController.RestrictPermissions Completed");
+                _logger.Log.Info("CheckUpBackService.RestrictPermissions Completed");
             }
-            catch (Exception ex) { _logger.Log.Fatal("PackUpController.RestrictPermissions:", ex); identityResponse.ErrorDesc = ex.Message; }
+            catch (Exception ex)
+            {
+                _logger.Log.Fatal("CheckUpBackService.RestrictPermissions:", ex);
+                identityResponse.ErrorDesc = ex.Message;
+                // keep existing ErrorCode if already set, otherwise use generic
+                if (identityResponse.ErrorCode == 0 || identityResponse.ErrorCode == 206)
+                    identityResponse.ErrorCode = 205;
+            }
 
             identityResponse.ResponseTime = DateTime.Now.Ticks;
             return identityResponse;
-
         }
 
         public Response GetSource(string userName)

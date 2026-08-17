@@ -1,33 +1,52 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using AcraData.Data;
 using CheckUpService;
 using CheckUpService.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using CheckUpBackEndService;
 
 namespace CheckUpBackEndService.Controllers
 {
     public class CheckUpController : Controller
     {
-        private DbContextOptions<Acra3DbContext> _acra3ContextOptions;
-        private CheckUpService.CheckUpBackService _CheckUpService;
-        private AcraUtils.Logger _logger;
+        private readonly DbContextOptions<Acra3DbContext> _acra3ContextOptions;
+        private readonly CheckUpService.CheckUpBackService _CheckUpService;
+        private readonly AcraUtils.Logger _logger;
+        private readonly ILogger<CheckUpController> _msLogger;
         private readonly ElasticJournalService _elastic;
 
         public CheckUpController(
             CheckUpService.CheckUpBackService CheckUpService,
             DbContextOptions<Acra3DbContext> acra3ContextOptions,
             AcraUtils.Logger logger,
+            ILogger<CheckUpController> msLogger,
             ElasticJournalService elastic)
         {
             _acra3ContextOptions = acra3ContextOptions;
             _CheckUpService = CheckUpService;
             _logger = logger;
+            _msLogger = msLogger;
             _elastic = elastic;
+        }
+
+        /// <summary>
+        /// Central helper: always writes to Elastic journal (success + error paths).
+        /// Fire-and-forget so journal latency never blocks the client.
+        /// </summary>
+        private void LogToJournal(CheckUpJournalDocument doc)
+        {
+            try
+            {
+                _ = _elastic.LogAsync(doc);
+            }
+            catch (Exception ex)
+            {
+                // Should never happen because LogAsync already swallows, but extra safety
+                _msLogger.LogError(ex, "Failed to schedule CheckUp journal log. EventType={EventType}", doc?.EventType);
+            }
         }
 
         [HttpGet]
@@ -41,15 +60,17 @@ namespace CheckUpBackEndService.Controllers
             catch (Exception ex)
             {
                 _logger.Log.Fatal("CheckUpController.RestrictPermissions:", ex);
+                _msLogger.LogError(ex, "RestrictPermissions failed for userName={UserName}", userName);
                 result = _CheckUpService.GetErrorResponse(ex.Message);
             }
 
-            _ = _elastic.LogAsync(new CheckUpJournalDocument
+            // Always log to journal (success or error)
+            LogToJournal(new CheckUpJournalDocument
             {
                 EventType  = "RestrictPermissions",
                 UserName   = userName,
-                ErrorCode  = result.ErrorCode,
-                ErrorDesc  = result.ErrorDesc
+                ErrorCode  = result?.ErrorCode ?? -1,
+                ErrorDesc  = result?.ErrorDesc
             });
 
             return result;
@@ -66,15 +87,16 @@ namespace CheckUpBackEndService.Controllers
             catch (Exception ex)
             {
                 _logger.Log.Fatal("CheckUpController.GetSource:", ex);
+                _msLogger.LogError(ex, "GetSource failed for userName={UserName}", userName);
                 result = _CheckUpService.GetErrorResponse(ex.Message);
             }
 
-            _ = _elastic.LogAsync(new CheckUpJournalDocument
+            LogToJournal(new CheckUpJournalDocument
             {
                 EventType = "GetSource",
                 UserName  = userName,
-                ErrorCode = result.ErrorCode,
-                ErrorDesc = result.ErrorDesc
+                ErrorCode = result?.ErrorCode ?? -1,
+                ErrorDesc = result?.ErrorDesc
             });
 
             return result;
@@ -91,16 +113,17 @@ namespace CheckUpBackEndService.Controllers
             catch (Exception ex)
             {
                 _logger.Log.Fatal("CheckUpController.GetIsMemberOrg:", ex);
+                _msLogger.LogError(ex, "GetIsMemberOrg failed for userName={UserName}, source={Source}", userName, source);
                 result = _CheckUpService.GetErrorResponse(ex.Message);
             }
 
-            _ = _elastic.LogAsync(new CheckUpJournalDocument
+            LogToJournal(new CheckUpJournalDocument
             {
                 EventType  = "GetIsMemberOrg",
                 UserName   = userName,
                 SourceName = source,
-                ErrorCode  = result.ErrorCode,
-                ErrorDesc  = result.ErrorDesc
+                ErrorCode  = result?.ErrorCode ?? -1,
+                ErrorDesc  = result?.ErrorDesc
             });
 
             return result;
@@ -120,10 +143,11 @@ namespace CheckUpBackEndService.Controllers
             catch (Exception ex)
             {
                 _logger.Log.Fatal("CheckUpController.RegisterReceivedPackage:", ex);
+                _msLogger.LogError(ex, "RegisterReceivedPackage failed. UserName={UserName}, FileName={FileName}", userName, fileName);
                 result = _CheckUpService.GetErrorResponse(ex.Message);
             }
 
-            _ = _elastic.LogAsync(new CheckUpJournalDocument
+            LogToJournal(new CheckUpJournalDocument
             {
                 EventType  = "RegisterPackage",
                 UserName   = userName,
@@ -131,8 +155,8 @@ namespace CheckUpBackEndService.Controllers
                 SessionId  = sessionID,
                 FileName   = fileName,
                 Thumbprint = thumbprint,
-                ErrorCode  = result.ErrorCode,
-                ErrorDesc  = result.ErrorDesc
+                ErrorCode  = result?.ErrorCode ?? -1,
+                ErrorDesc  = result?.ErrorDesc
             });
 
             return result;
